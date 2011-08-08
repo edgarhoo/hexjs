@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="gbk"/>
+        <title>PitayaJs</title>
+        <link href="http://static.c.aliimg.com/css/lib/fdev-v4/core/fdev-float.css" rel="stylesheet"/>
+        <script src="http://static.c.aliimg.com/js/lib/fdev-v4/core/fdev-min.js"></script>
+        <script src="http://static.c.aliimg.com/js/lib/fdev-v4/widget/util/debug-min.js"></script>
+        <script src="hex.js"></script>
+        <script>
+        (function( $, hexjs ){
+            var define = hexjs.define,
+                register = hexjs.register;
+            
+            var a = 'ccccc';
+            
+            define( 'bb', function( require, exports ){
+                exports.b = 'bbbb';
+            } );
+            
+            define( 'aa', function( require, exports ){
+                var b = require('bb');
+                exports.a = 'aaaa'+b.b;
+            } );
+            
+            define( 'cc', function( require, exports ){
+                var aa = require('aa');
+                exports.a = 'ccacca';
+                return {
+                    a: 'accacc'+a,
+                    b: aa.a
+                }
+            } );
+            
+            define( 'test', function( require ){
+                var cc = require('cc');
+                $.log(cc.a);
+                $.log(cc.b);
+            } );
+            
+            register( 'test' );
+            //var b = require('test').a;
+            //require('test').b();
+            
+            define(function(){$.log('anonymous3');}).register();
+            define(function(){$.log('anonymous2');}).register('~');
+            define(function(){$.log('anonymous1');}).register();
+            
+        })( jQuery, hexjs );
+        </script>
+    </head>
+    <body>
+    </body>
+</html>
