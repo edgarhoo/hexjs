@@ -13,7 +13,6 @@
                 register = hexjs.register;
             
             var a = 'ccccc';
-            var log = console.info;
             
             define( 'bb', function( require, exports ){
                 exports.b = 'bbbb';
@@ -35,19 +34,19 @@
             
             define( 'test', function( require ){
                 var cc = require('cc');
-                log( 'cc.a: ' + cc.a + ' accaccccccc');
-                log( 'cc.b: ' + cc.b + ' aaaabbbb' );
+                console.info( 'cc.a: ' + cc.a + ' accaccccccc');
+                console.info( 'cc.b: ' + cc.b + ' aaaabbbb' );
             } );
             
             register( 'test' );
             
-            define(function(){log('anonymous3');}).register();
-            define(function(){log('anonymous2');}).register('~');
-            define(function(){log('anonymous1');}).register();
+            define(function(){console.info('anonymous3');}).register();
+            define(function(){console.info('anonymous2');}).register('~');
+            define(function(){console.info('anonymous1');}).register();
             
             define( 'dd', function( require, exports ){
                 var bb = require('bb');
-                log( bb.b );
+                console.info( bb.b );
             } );
             
             register('dd');
