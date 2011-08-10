@@ -1,32 +1,46 @@
 /**
  * HexJS
- * @author  edgarhoo@gmail.com, Edgar Hoo
+ * @author  Edgar Hoo , edgarhoo@gmail.com
  * @version alpha
- * @build   110808
+ * @build   110810
  * */
 
-this.hexjs = {};
-(function( $, hexjs ){
+(function( $, global ){
     
-    var _modules = {},
-        _fn = {},
-        _anonymousModule = null;
+    var _hexjs = {},
+        _modules = {},
+        _anonymousModules = [],
+        _isLog = !!$.log;
+    
+    
+    /**
+     * module constructor
+     * @param {string} module id
+     * @param {object} module content
+     * */
+    var _Module = function( id, fn ){
+        this.id = id;
+        this.fn = fn;
+        this.exports = {};
+        this.once = false;
+    };
+    
     
     /**
      * define module
-     * @param {string} module name
+     * @param {string} module id
      * @param {object|function} module content, function 'init' must exist
      * */
-    var define = function( name, fn ){
+    var define = function( id, fn ){
         
-        if ( 'string' !== typeof name ){
-            fn = name;
-            name = '';
+        if ( 'string' !== typeof id ){
+            fn = id;
+            id = '';
         }
         
-        // if name already exists, return
-        if ( _modules[name] ){
-            $.log( 'the module ' + name + ' already exists. ' );
+        // if id already exists, return
+        if ( _modules[id] ){
+            _isLog && $.log( $.now() + ': the module ' + id + ' already exists. ' );
             return;
         }
         
@@ -34,18 +48,19 @@ this.hexjs = {};
             fn = { init: fn };
         }
         
-        var module = {
-            name: name,
-            fn: fn,
-            exports: {},
-            once: false
-        };
+        var module = new _Module( id, fn );
+        //var module = {
+        //    id: id,
+        //    fn: fn,
+        //    exports: {},
+        //    once: false
+        //};
         
-        if ( name !== '' ){
-            _modules[name] = module;
+        if ( id !== '' ){
+            _modules[id] = module;
         } else {
-            _anonymousModule = module;
-            return _fn;
+            _anonymousModules[_anonymousModules.length] = module;
+            return new _Fn( _anonymousModules.length - 1 );
         }
         
     };
@@ -53,56 +68,67 @@ this.hexjs = {};
     
     /**
      * register module
-     * @param {string} module name
+     * @param {string} module id
+     * @param {object} module
      * */
-    var register = function( name ){
+    var register = function( id, module ){
         
         var args = arguments,
-            names,
-            module,
+            ids,
             isReady;
         
-        if ( $.isArray( name ) ){
-            $.each( name, function( i, item ){
+        if ( $.isArray( id ) ){
+            $.each( id, function( i, item ){
                 args.callee( item );
             } );
             return;
         }
         
-        names = name.split('~');
+        ids = id.split('~');
         
-        if ( names.length === 1 ){
-            name = names[0];
+        if ( ids.length === 1 ){
+            id = ids[0];
             isReady = true;
         } else {
-            name = names[1];
+            id = ids[1];
         }
         
-        module = _anonymousModule ? _anonymousModule : _modules[name];
+        if ( !module || !(module instanceof _Module) ){
+            module = _modules[id];
+        }
         
-        if ( !module || module.once ){
+        if ( module.once ){
             return;
         }
         
         module.once = true;
         
-        isReady ? $(document).ready(function(){ _run( module, 'ready' ); }) : _run( module, 'now' );
+        isReady ? $(document).ready(function(){ _execution( module, 'ready' ); }) : _execution( module, 'now' );
     };
     
     
-    _fn.register = function( isReady ){
-            var name = isReady === '~' ? '~' : '';
-            register( name );
+    /**
+     * fn constructor
+     * @param {int} anonymous module idx
+     * */
+    var _Fn = function( idx ){
+        this.idx = idx;
+    };
+    
+    
+    _Fn.prototype.register = function( isReady ){
+        var id = isReady === '~' ? '~' : '';
+        register( id, _anonymousModules[this.idx] );
     };
     
     
     /**
      * require module
-     * @param {string} module name
+     * @param {string} module id
      * */
-    var _require = function( name ){
+    var _require = function( id ){
         
-        var module = _modules[name];
+        var module = _modules[id];
         if ( !module ){
             return;
         }
@@ -111,26 +137,26 @@ this.hexjs = {};
             _exports( module );
         }
         return module.exports;
-    }
+    };
     
     
     /**
-     * run module
+     * execution module
      * @param {object} module
      * @param {string} running status
      * */
-    var _run = function( module, time ){
+    var _execution = function( module, status ){
         try {
             module.fn.init( _require );
-            if ( module.name === '' ){
-                $.log( 'the anonymous module registered. ' + time + ' run.' );
+            if ( module.id === '' ){
+                _isLog && $.log( $.now() + ': the module anonymous registered. ' + status + ' execution.' );
                 return;
             }
-            $.log( 'the module ' + module.name + ' registered. ' + time + ' run.' );
+            _isLog && $.log( $.now() + ': the module ' + module.id + ' registered. ' + status + ' execution.' );
         } catch(e) {
-            $.log( 'warn the module ' + module.name + ' failed to register.' );
+            _isLog && $.log( $.now() + ': warn the module ' + module.id + ' failed to register.' );
         }
-    }
+    };
     
     
     /**
@@ -141,14 +167,16 @@ this.hexjs = {};
         try {
             var exports = module.fn.init( _require, module.exports );
             module.exports = $.extend( module.exports, exports );
-            $.log( 'the module ' + module.name + ' required.' );
+            _isLog && $.log( $.now() + ': the module ' + module.id + ' required.' );
         } catch(e) {
-            $.log( 'warn: the module ' + module.name + ' failed to require.' );
+            _isLog && $.log( $.now() + ': warn: the module ' + module.id + ' failed to require.' );
         }
-    }
+    };
     
     
-    hexjs.define = define;
-    hexjs.register = register;
+    _hexjs.define = define;
+    _hexjs.register = register;
     
-})( jQuery, hexjs );
+    global.hexjs = _hexjs;
+    
+})( jQuery, this );
