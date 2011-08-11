@@ -18,38 +18,47 @@
             <h1>define &amp; require &amp; exports</h1>
             <pre class="prettyprint lang-js">
     // module-a
-    hexjs.define( 'module-a', function( require, exports ){
+    hexjs.define( 'module-a', function( require, exports, module ){
         exports.a = 'aaa';
     } );
 
     // module-b
-    hexjs.define( 'module-b', function( require, exports ){
+    hexjs.define( 'module-b', function( require, exports, module ){
         return {
             b: 'bbb'
         }
     } );
 
     // module-c
-    hexjs.define( 'module-c', function( require, exports ){
+    hexjs.define( 'module-c', function( require, exports, module ){
         exports.c = '111'
         return {
             c: 'ccc'
         }
     } );
 
+    // module-f
+    hexjs.define( 'module-f', function( require, exports, module ){
+        module.exports = {
+            f: 'fff'
+        };
+    } );
+
     // module-d
-    hexjs.define( 'module-d', function( require, exports ){
+    hexjs.define( 'module-d', function( require, exports, module ){
         var a = require('module-a'); // import module-a
         var b = require('module-b'); // import module-b
         var c = require('module-c'); // import module-c
+        var f = require('module-f'); // import module-f
         console.info( a.a ); // --> 'aaa'
         console.info( b.b ); // --> 'bbb'
         console.info( c.c ); // --> 'ccc'
+        console.info( f.f ); // --> 'fff'
     } );
 
     // module-e
     var obj = {
-        init: function( require, exports ){
+        init: function( require, exports, module ){
             var a = require('module-a');
             this._other(a.a); // --> 'aaa'
         },
@@ -69,6 +78,7 @@
     // 'aaa'
     // 'bbb'
     // 'ccc'
+    // 'fff'
     
     // register module now
     hexjs.register('~module-d');
@@ -76,6 +86,7 @@
     // 'aaa'
     // 'bbb'
     // 'ccc'
+    // 'fff'
 
     hexjs.register('module-e');
     // output:
@@ -85,7 +96,8 @@
     // output: 
     // 'aaa'
     // 'bbb'
-    // 'ccc' // from module-d, and the above
+    // 'ccc'
+    // 'fff' // from module-d, and the above
     // 'aaa' // from module-e
 
     hexjs.register( ['module-d', '~module-e'] );
@@ -94,6 +106,7 @@
     // 'aaa' // from module-d, and the following
     // 'bbb'
     // 'ccc'
+    // 'fff'
 
     hexjs.define(function( require, exports ){
         var b = require('module-b');
