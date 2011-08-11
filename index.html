@@ -13,7 +13,7 @@
     </head>
     <body onload="prettyPrint();" style="width:800px;margin:0 auto;">
         <h1>HexJS Usage</h1>
-        <h2>by Edgar</h2>
+        <h2><a href="https://github.com/edgarhoo/hexjs">git repo</a></h2>
         <article>
             <h1>define &amp; require &amp; exports</h1>
             <pre class="prettyprint lang-js">
@@ -30,7 +30,7 @@
     } );
 
     // module-c
-    hexjs.define( 'module-b', function( require, exports ){
+    hexjs.define( 'module-c', function( require, exports ){
         exports.c = '111'
         return {
             c: 'ccc'
@@ -38,7 +38,7 @@
     } );
 
     // module-d
-    hexjs.define( 'module-c', function( require, exports ){
+    hexjs.define( 'module-d', function( require, exports ){
         var a = require('module-a'); // import module-a
         var b = require('module-b'); // import module-b
         var c = require('module-c'); // import module-c
