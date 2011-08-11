@@ -2,7 +2,11 @@
  * HexJS
  * @author  Edgar Hoo , edgarhoo@gmail.com
  * @version alpha
- * @build   110810
+ * @build   110812
+ * @uri     http://hexjs.edgarhoo.org/
+ * @license MIT
+ * 
+ * @base    fdev-v4, http://static.c.aliimg.com/js/lib/fdev-v4/core/fdev-min.js
  * */
 
 (function( $, global ){
@@ -49,12 +53,6 @@
         }
         
         var module = new _Module( id, fn );
-        //var module = {
-        //    id: id,
-        //    fn: fn,
-        //    exports: {},
-        //    once: false
-        //};
         
         if ( id !== '' ){
             _modules[id] = module;
@@ -125,14 +123,15 @@
     /**
      * require module
      * @param {string} module id
+     * @param {boolean} refresh or no
      * */
-    var _require = function( id ){
+    var _require = function( id, refresh ){
         
         var module = _modules[id];
         if ( !module ){
             return;
         }
-        if ( !module.once ){
+        if ( !module.once || refresh ){
             module.once = true;
             _exports( module );
         }
@@ -165,7 +164,7 @@
      * */
     var _exports = function( module ){
         try {
-            var exports = module.fn.init( _require, module.exports );
+            var exports = module.fn.init( _require, module.exports, module );
             module.exports = $.extend( module.exports, exports );
             _isLog && $.log( $.now() + ': the module ' + module.id + ' required.' );
         } catch(e) {

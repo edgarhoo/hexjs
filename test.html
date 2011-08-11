@@ -52,6 +52,21 @@
             register('dd');
             
         })( jQuery, hexjs );
+        (function( $, define, register ){
+
+            define( 'aaa', function( require, exports, module ){
+
+                module.exports = {
+                    a: 'exports a'
+                };
+
+            } );
+
+            define(function( require ){
+                console.info( require('aaa').a);
+            }).register();            
+            
+        })( jQuery, hexjs.define, hexjs.register );
         </script>
     </head>
     <body>
