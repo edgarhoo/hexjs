@@ -2,15 +2,11 @@
  * HexJS
  * @author  Edgar Hoo , edgarhoo@gmail.com
  * @version alpha
-<<<<<<< HEAD
- * @build   110810
-=======
  * @build   110812
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT
  * 
  * @base    fdev-v4, http://static.c.aliimg.com/js/lib/fdev-v4/core/fdev-min.js
->>>>>>> master
  * */
 
 (function( $, global ){
@@ -57,15 +53,6 @@
         }
         
         var module = new _Module( id, fn );
-<<<<<<< HEAD
-        //var module = {
-        //    id: id,
-        //    fn: fn,
-        //    exports: {},
-        //    once: false
-        //};
-=======
->>>>>>> master
         
         if ( id !== '' ){
             _modules[id] = module;
@@ -136,24 +123,16 @@
     /**
      * require module
      * @param {string} module id
-<<<<<<< HEAD
-     * */
-    var _require = function( id ){
-=======
      * @param {boolean} refresh or no
      * */
     var _require = function( id, refresh ){
->>>>>>> master
         
         var module = _modules[id];
         if ( !module ){
             return;
         }
-<<<<<<< HEAD
-        if ( !module.once ){
-=======
+
         if ( !module.once || refresh ){
->>>>>>> master
             module.once = true;
             _exports( module );
         }
@@ -168,7 +147,7 @@
      * */
     var _execution = function( module, status ){
         try {
-            module.fn.init( _require );
+            module.fn.init( _require, module.exports, module );
             if ( module.id === '' ){
                 _isLog && $.log( $.now() + ': the module anonymous registered. ' + status + ' execution.' );
                 return;
@@ -186,11 +165,7 @@
      * */
     var _exports = function( module ){
         try {
-<<<<<<< HEAD
-            var exports = module.fn.init( _require, module.exports );
-=======
             var exports = module.fn.init( _require, module.exports, module );
->>>>>>> master
             module.exports = $.extend( module.exports, exports );
             _isLog && $.log( $.now() + ': the module ' + module.id + ' required.' );
         } catch(e) {

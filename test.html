@@ -52,8 +52,6 @@
             register('dd');
             
         })( jQuery, hexjs );
-<<<<<<< HEAD
-=======
         (function( $, define, register ){
 
             define( 'aaa', function( require, exports, module ){
@@ -63,13 +61,29 @@
                 };
 
             } );
-
-            define(function( require ){
-                console.info( require('aaa').a);
-            }).register();            
             
+            define( 'bbb', function( require, exports, module ){
+                
+                var M = module.constructor;
+                
+                M.prototype.get = function(){
+                    console.info( this.id );
+                };
+            } );
+
+            define(function( require, exports, module ){
+                require('bbb');
+                module.get();
+                console.info( require('aaa').a);
+            }).register();
+            
+            define('ccc',function( require, exports, module ){
+                module.get();
+                
+            });           
+            
+            register('ccc');
         })( jQuery, hexjs.define, hexjs.register );
->>>>>>> master
         </script>
     </head>
     <body>
