@@ -3,89 +3,67 @@
     <head>
         <meta charset="gbk"/>
         <title>HexJS Test</title>
-        <link href="http://static.c.aliimg.com/css/lib/fdev-v4/core/fdev-float.css" rel="stylesheet"/>
         <script src="http://static.c.aliimg.com/js/lib/fdev-v4/core/fdev-min.js"></script>
-        <script src="http://static.c.aliimg.com/js/lib/fdev-v4/widget/util/debug-min.js"></script>
+        <script>jQuery.util.debug=true;</script>
         <script src="hex.js"></script>
+        <script src="test.js"></script>
         <script>
-        (function( $, hexjs ){
-            var define = hexjs.define,
-                register = hexjs.register;
-            
-            var a = 'ccccc';
-            
-            define( 'bb', function( require, exports ){
-                exports.b = 'bbbb';
-            } );
-            
-            define( 'aa', function( require, exports ){
-                var b = require('bb');
-                exports.a = 'aaaa'+b.b;
-            } );
-            
-            define( 'cc', function( require, exports ){
-                var aa = require('aa');
-                exports.a = 'ccacca';
-                return {
-                    a: 'accacc'+a,
-                    b: aa.a
-                }
-            } );
-            
-            define( 'test', function( require ){
-                var cc = require('cc');
-                console.info( 'cc.a: ' + cc.a + ' accaccccccc');
-                console.info( 'cc.b: ' + cc.b + ' aaaabbbb' );
-            } );
-            
-            register( 'test' );
-            
-            define(function(){console.info('anonymous3');}).register();
-            define(function(){console.info('anonymous2');}).register('~');
-            define(function(){console.info('anonymous1');}).register();
-            
-            define( 'dd', function( require, exports ){
-                var bb = require('bb');
-                console.info( bb.b );
-            } );
-            
-            register('dd');
-            
-        })( jQuery, hexjs );
         (function( $, define, register ){
-
-            define( 'aaa', function( require, exports, module ){
-
-                module.exports = {
-                    a: 'exports a'
-                };
-
-            } );
             
-            define( 'bbb', function( require, exports, module ){
-                
-                var M = module.constructor;
-                
-                M.prototype.get = function(){
-                    console.info( this.id );
-                };
-            } );
-
-            define(function( require, exports, module ){
-                require('bbb');
-                module.get();
-                console.info( require('aaa').a);
+            register('register-ready');
+            
+            define(function(require){
+                require('register-now');
+            }).register('~');
+            
+            define(function(require){
+                require('require').print( require('register-now').isNow, 'register-now');
             }).register();
             
-            define('ccc',function( require, exports, module ){
-                module.get();
-                
-            });           
+            register( ['register-multi-a','register-multi-b','register-multi-c'] );
             
-            register('ccc');
+            define(function(require){
+                require('require').print( true, 'require');
+            } ).register();
+            
+            define(function(require){
+                require('hexjs-test').print( require('exports').variable === 'exports', 'exports');
+            } ).register();
+            
+            define(function(require){
+                require('hexjs-test').print( require('return').variable === 'return', 'return');
+            } ).register();
+            
+            define(function(require){
+                require('hexjs-test').print( require('return-cover-exports').variable === 'return-cover-exports', 'return-cover-exports');
+            } ).register();
+            
+            define(function(require){
+                require('hexjs-test').print( require('module-exports').variable === 'module-exports', 'module-exports');
+            } ).register();
+            
+            define(function(require){
+                require('hexjs-test').print( require('incoming-object').variable === 'incoming-object', 'incoming-object');
+            } ).register();
+            
+            define(function(require){
+                require('hexjs-test').print( require('module-id').id === 'module-id', 'module-id');
+            } ).register();
+            
+            define(function(require, exports, module ){
+                require('module-constructor');
+                require('hexjs-test').print( module.getId() === 'module-constructor', 'module-constructor');
+            } ).register();
+            
+            
+            
         })( jQuery, hexjs.define, hexjs.register );
         </script>
     </head>
-    <body>
+    <body style="width:800px;margin:0 auto;">
+        <h1>HexJS Test</h1>
+        <ul id="test-result">
+            
+        </ul>
     </body>
 </html>

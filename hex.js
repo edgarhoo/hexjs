@@ -14,7 +14,7 @@
     var _hexjs = {},
         _modules = {},
         _anonymousModules = [],
-        _isLog = !!$.log;
+        _isLog = $.util.debug && !!global.console;
     
     
     /**
@@ -44,8 +44,8 @@
         
         // if id already exists, return
         if ( _modules[id] ){
-            _isLog && $.log( $.now() + ': the module ' + id + ' already exists. ' );
-            return;
+            _isLog && console.warn( $.now() + ': the module ' + id + ' already exists. ' );
+            return null;
         }
         
         if ( $.isFunction(fn) ){
@@ -96,7 +96,7 @@
         }
         
         if ( !module || module.once ){
-            return;
+            return null;
         }
         
         module.once = true;
@@ -149,12 +149,12 @@
         try {
             module.fn.init( _require, module.exports, module );
             if ( module.id === '' ){
-                _isLog && $.log( $.now() + ': the module anonymous registered. ' + status + ' execution.' );
+                _isLog && console.info( $.now() + ': the module anonymous registered. ' + status + ' execution.' );
                 return;
             }
-            _isLog && $.log( $.now() + ': the module ' + module.id + ' registered. ' + status + ' execution.' );
+            _isLog && console.info( $.now() + ': the module ' + module.id + ' registered. ' + status + ' execution.' );
         } catch(e) {
-            _isLog && $.log( $.now() + ': warn the module ' + module.id + ' failed to register.' );
+            _isLog && console.warn( $.now() + ': the module ' + module.id + ' failed to register.' );
         }
     };
     
@@ -167,9 +167,9 @@
         try {
             var exports = module.fn.init( _require, module.exports, module );
             module.exports = $.extend( module.exports, exports );
-            _isLog && $.log( $.now() + ': the module ' + module.id + ' required.' );
+            _isLog && console.info( $.now() + ': the module ' + module.id + ' required.' );
         } catch(e) {
-            _isLog && $.log( $.now() + ': warn: the module ' + module.id + ' failed to require.' );
+            _isLog && console.warn( $.now() + ': the module ' + module.id + ' failed to require.' );
         }
     };
     
