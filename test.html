@@ -27,6 +27,10 @@
             } ).register();
             
             define(function(require){
+                require('hexjs-test').print( require('require-refresh').variable !== require('require-refresh',true).variable, 'require-refresh' );
+            }).register();
+            
+            define(function(require){
                 require('hexjs-test').print( require('exports').variable === 'exports', 'exports');
             } ).register();
             
@@ -55,8 +59,16 @@
                 require('hexjs-test').print( module.getId() === 'module-constructor', 'module-constructor');
             } ).register();
             
-            
-            
+            /*
+            define(function(require){
+                var a = require('require-refresh');
+                var b = a.variable;
+                $('#a').click(function(){console.info(a.variable);});
+                $('#b').click(function(){console.info(b);});
+                $('#c').click(function(){require('require-refresh',true);});
+                $('#d').click(function(){console.info(require('require-refresh').variable)});
+            }).register();
+            */
         })( jQuery, hexjs.define, hexjs.register );
         </script>
     </head>

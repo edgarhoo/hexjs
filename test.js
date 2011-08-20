@@ -64,6 +64,19 @@ hexjs.define( 'require', function( require, exports, module ){
     return require('hexjs-test')
 } );
 
+/**
+ * @module require-refresh
+ * */
+hexjs.define( 'require-refresh-pre', function( require, exports, module ){
+    var variable = 1;
+    exports.plus = function(){
+        variable++;
+        return variable;
+    };
+} );
+hexjs.define( 'require-refresh', function( require, exports, module ){
+    exports.variable = require('require-refresh-pre').plus();
+} );
 
 /**
  * @module exports
