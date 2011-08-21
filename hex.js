@@ -2,7 +2,7 @@
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
  * @version alpha
- * @build   110820
+ * @build   110821
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * 
@@ -14,7 +14,7 @@
     var _hexjs = {},
         _modules = {},
         _anonymousModules = [],
-        _isLog = !!$.log;
+        _isLog = !!$.log || global.location.search.indexOf('hexjs.debug=true') > -1;
     
     
     /**
@@ -25,7 +25,7 @@
     var _log = function( message, type ){
         type = type || 'info';
         !!global.console ? 
-            console[type]( message ) :
+            global.console[type]( message ) :
             $.log( message );
     };
     
