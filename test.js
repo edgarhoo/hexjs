@@ -1,5 +1,5 @@
 /**
- * @fileview HexJS test
+ * @fileoverview HexJS test
  * @author Edgar
  * @build 110814
  * */

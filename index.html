@@ -2,126 +2,22 @@
 <html>
     <head>
         <meta charset="utf-8"/>
-        <title>HexJS Usage</title>
+        <title>HexJS</title>
         <meta name="author" content="Edgar Hoo, edgarhoo.net"/>
-        <meta name="email" content="edgarhoo@gmail.com"/>
-        <meta name="date" content="Aug 10, 2011"/>
-        <link rel="shortcut icon" href="http://static.edgar.im/img/logo/e.ico"/>
-        <link rel="stylesheet" href="http://static.edgar.im/css/app/slide/sligar.css"/>
-        <link rel="stylesheet" href="http://static.edgar.im/css/third/prettify/prettify.css"/>
-        <script src="http://static.edgar.im/js/third/prettify/prettify.js"></script>
+        <meta name="date" content="Aug 26, 2011"/>
     </head>
-    <body onload="prettyPrint();" style="width:800px;margin:0 auto;">
-        <h1>HexJS Usage</h1>
-        <p><a href="https://github.com/edgarhoo/hexjs">git repo</a></p>
-        <p><a href="test.html?hexjs.debug=true">Test</a></p>
-        <article>
-            <h1>define &amp; require &amp; exports</h1>
-            <pre class="prettyprint lang-js">
-    // module-a
-    hexjs.define( 'module-a', function( require, exports, module ){
-        exports.a = 'aaa';
-    } );
-
-    // module-b
-    hexjs.define( 'module-b', function( require, exports, module ){
-        return {
-            b: 'bbb'
-        }
-    } );
-
-    // module-c
-    hexjs.define( 'module-c', function( require, exports, module ){
-        exports.c = '111'
-        return {
-            c: 'ccc'
-        }
-    } );
-
-    // module-f
-    hexjs.define( 'module-f', function( require, exports, module ){
-        module.exports = {
-            f: 'fff'
-        };
-    } );
-
-    // module-d
-    hexjs.define( 'module-d', function( require, exports, module ){
-        var a = require('module-a'); // import module-a
-        var b = require('module-b'); // import module-b
-        var c = require('module-c'); // import module-c
-        var f = require('module-f'); // import module-f
-        console.info( a.a ); // --> 'aaa'
-        console.info( b.b ); // --> 'bbb'
-        console.info( c.c ); // --> 'ccc'
-        console.info( f.f ); // --> 'fff'
-    } );
-
-    // module-e
-    hexjs.define( 'module-e', {
-        init: function( require, exports, module ){
-            var a = require('module-a');
-            this._other(a.a); // --> 'aaa'
-        },
-        _other: function(a){
-            console.info(a);
-        }
-    } );
-            </pre>
-        </article>
-        <article>
-            <h1>register &amp; define anonymous module then register</h1>
-            <pre class="prettyprint lang-js">
-    // register module after ready
-    hexjs.register('module-d');
-    // output:
-    // 'aaa'
-    // 'bbb'
-    // 'ccc'
-    // 'fff'
-    
-    // register module now
-    hexjs.register('~module-d');
-    // output:
-    // 'aaa'
-    // 'bbb'
-    // 'ccc'
-    // 'fff'
-
-    hexjs.register('module-e');
-    // output:
-    // 'aaa'
-
-    hexjs.register( ['module-d', 'module-e'] );
-    // output: 
-    // 'aaa'
-    // 'bbb'
-    // 'ccc'
-    // 'fff' // from module-d, and the above
-    // 'aaa' // from module-e
-
-    hexjs.register( ['module-d', '~module-e'] );
-    // output: 
-    // 'aaa' // from module-e
-    // 'aaa' // from module-d, and the following
-    // 'bbb'
-    // 'ccc'
-    // 'fff'
-
-    hexjs.define(function( require, exports ){
-        var b = require('module-b');
-        console.info(b.b);
-    }).register();
-    // output(after ready):
-    // 'bbb'
-    
-    hexjs.define(function( require, exports ){
-        var c = require('module-c');
-        console.info(c.c);
-    }).register('~');
-    // output(now):
-    // 'ccc'
-            </pre>
-        </article>
+    <body>
+        <hgroup>
+            <h1>HexJS</h1>
+            <h2>a page-level module manager</h2>
+        </hgroup>
+        <nav>
+            <ul>
+                <li><a href="manual.html">Manual</a></li>
+                <li><a href="manual.zh-cn.html">使用手册</a></li>
+                <li><a href="test.html?hexjs.debug=true">Test</a></li>
+                <li><a href="https://github.com/edgarhoo/hexjs">git repo</a></li>
+            </ul>
+        </nav>
     </body>
 </html>
