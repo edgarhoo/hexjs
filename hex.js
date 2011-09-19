@@ -2,7 +2,7 @@
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
  * @version alpha
- * @build   110828
+ * @build   110919
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * 
@@ -23,10 +23,20 @@
      * @param {string} message type
      * */
     var _log = function( message, type ){
-        type = type || 'info';
-        !!global.console ? 
-            global.console[type]( message ) :
-            $.log( message );
+        
+        if ( !!global.console ){
+            _log = function( message, type ){
+                type = type || 'info';
+                global.console[type]( message );
+            };
+        } else {
+            _log = function( message, type ){
+                $.log( message );
+            };
+        }
+        
+        _log( message, type );
+        
     };
     
     
@@ -36,10 +46,12 @@
      * @param {object} module content
      * */
     var _Module = function( id, fn ){
+        
         this.id = id;
         this.fn = fn;
         this.exports = {};
         this.once = false;
+        
     };
     
     
@@ -119,7 +131,12 @@
         
         module.once = true;
         
-        isReady ? $(document).ready(function(){ _execution( module, 'ready' ); }) : _execution( module, 'now' );
+        isReady ?
+            $(document).ready(function(){
+                _execution( module, 'ready' );
+            }) :
+            _execution( module, 'now' );
+        
     };
     
     
@@ -128,13 +145,18 @@
      * @param {int} anonymous module idx
      * */
     var _Fn = function( idx ){
+        
         this.idx = idx;
+        
     };
     
     
     _Fn.prototype.register = function( isReady ){
+        
         var id = isReady === '~' ? '~' : '';
+        
         register( id, _anonymousModules[this.idx] );
+        
     };
     
     
@@ -146,6 +168,7 @@
     var _require = function( id, refresh ){
         
         var module = _modules[id];
+        
         if ( !module ){
             return;
         }
@@ -154,6 +177,7 @@
             module.once = true;
             _exports( module );
         }
+        
         return module.exports;
     };
     
@@ -164,16 +188,20 @@
      * @param {string} running status
      * */
     var _execution = function( module, status ){
+        
         try {
             module.fn.init( _require, module.exports, module );
+            
             if ( module.id === '' ){
                 _isLog && _log( $.now() + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execution.' );
                 return;
             }
+            
             _isLog && _log( $.now() + ': the module "' + module.id + '" registered. ' + status + ' execution.' );
         } catch(e) {
             _isLog && _log( $.now() + ': the module "' + module.id + '" failed to register.', 'warn' );
         }
+        
     };
     
     
@@ -182,13 +210,17 @@
      * @param {object} module
      * */
     var _exports = function( module ){
+        
         try {
             var exports = module.fn.init( _require, module.exports, module );
+            
             module.exports = $.extend( module.exports, exports );
+            
             _isLog && _log( $.now() + ': the module "' + module.id + '" required.' );
         } catch(e) {
             _isLog && _log( $.now() + ': the module "' + module.id + '" failed to require.', 'warn' );
         }
+        
     };
     
     
