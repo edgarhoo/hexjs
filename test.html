@@ -5,60 +5,36 @@
         <title>HexJS Test</title>
         <script src="http://static.c.aliimg.com/js/lib/fdev-v4/core/fdev-min.js"></script>
         <script src="hex.js"></script>
-        <script src="test.js"></script>
         <script>
-        (function( $, define, register ){
+            hexjs.define( 'test', function( require, exports ){
+                var $result = jQuery('#test-result');
+                
+                var createItem = function( inner ){
+                    return jQuery('<li/>').html(inner).appendTo($result);
+                };
+                
+                exports.print = function( message ){
+                    createItem( message );
+                };
+            } );
             
-            register('register-ready');
+            hexjs.define( 'a', function( require, exports, module ){
+                exports.variable = 'string a';
+            } );
             
-            define(function(require){
-                require('register-now');
-            }).register('~');
+            hexjs.define( 'b', function( require, exports, module ){
+                exports.variable = 'string b';
+            } );
             
-            define(function(require){
-                require('require').print( require('register-now').isNow, 'register-now');
+            hexjs.define(function( require ){
+                var test = require('test'), a;
+                if ( true ){
+                    a = require('a');
+                } else {
+                    a = require('b');
+                }
+                test.print(a.variable);
             }).register();
-            
-            register( ['register-multi-a','register-multi-b','register-multi-c'] );
-            
-            define(function(require){
-                require('require').print( true, 'require');
-            } ).register();
-            
-            define(function(require){
-                require('hexjs-test').print( require('require-refresh').variable !== require('require-refresh',true).variable, 'require-refresh' );
-            }).register();
-            
-            define(function(require){
-                require('hexjs-test').print( require('exports').variable === 'exports', 'exports');
-            } ).register();
-            
-            define(function(require){
-                require('hexjs-test').print( require('return').variable === 'return', 'return');
-            } ).register();
-            
-            define(function(require){
-                require('hexjs-test').print( require('return-cover-exports').variable === 'return-cover-exports', 'return-cover-exports');
-            } ).register();
-            
-            define(function(require){
-                require('hexjs-test').print( require('module-exports').variable === 'module-exports', 'module-exports');
-            } ).register();
-            
-            define(function(require){
-                require('hexjs-test').print( require('incoming-object').variable === 'incoming-object', 'incoming-object');
-            } ).register();
-            
-            define(function(require){
-                require('hexjs-test').print( require('module-id').id === 'module-id', 'module-id');
-            } ).register();
-            
-            define(function(require, exports, module ){
-                require('module-constructor');
-                require('hexjs-test').print( module.getId() === 'module-constructor', 'module-constructor');
-            } ).register();
-            
-        })( jQuery, hexjs.define, hexjs.register );
         </script>
     </head>
     <body style="width:800px;margin:0 auto;">
