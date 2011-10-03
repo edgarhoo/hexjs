@@ -2,7 +2,7 @@
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
  * @version alpha
- * @build   110925
+ * @build   111003
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * 
@@ -133,9 +133,9 @@
         
         isReady ?
             $(document).ready(function(){
-                _execution( module, 'ready' );
+                _execute( module, 'after ready' );
             }) :
-            _execution( module, 'now' );
+            _execute( module, 'now' );
         
     };
     
@@ -183,21 +183,21 @@
     
     
     /**
-     * execution module
+     * execute module
      * @param {object} module
      * @param {string} running status
      * */
-    var _execution = function( module, status ){
+    var _execute = function( module, status ){
         
         try {
             module.fn.init( _require, module.exports, module );
             
             if ( module.id === '' ){
-                _isLog && _log( $.now() + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execution.' );
+                _isLog && _log( $.now() + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execute.' );
                 return;
             }
             
-            _isLog && _log( $.now() + ': the module "' + module.id + '" registered. ' + status + ' execution.' );
+            _isLog && _log( $.now() + ': the module "' + module.id + '" registered. ' + status + ' execute.' );
         } catch(e) {
             _isLog && _log( $.now() + ': the module "' + module.id + '" failed to register.', 'warn' );
         }
