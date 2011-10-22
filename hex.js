@@ -1,7 +1,7 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version alpha
+ * @version v0.1
  * @build   111003
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
