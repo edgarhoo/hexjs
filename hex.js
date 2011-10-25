@@ -1,41 +1,221 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.1
- * @build   111003
+ * @version v0.2
+ * @build   111025
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
- * 
- * @base    fdev-v4, http://static.c.aliimg.com/js/lib/fdev-v4/core/fdev-min.js
  * */
 
-(function( $, global ){
+!!this.hexjs || (function( global, doc ){
     
-    var _hexjs = {},
+    var _ = {},
+        _hexjs = {},
         _modules = {},
         _anonymousModules = [],
-        _isLog = !!$.util.debug || global.location.search.indexOf('hexjs.debug=true') > -1;
+        _isDebug = global.location.search.indexOf('hexjs.debug=true') > -1;
     
+    _.toString = Object.prototype.toString;
+    
+    _.now = Date.now || function(){
+        
+        return new Date().getTime();
+        
+    };
+    
+    _.isFunction = function( obj ){
+        
+        return _.toString.call( obj ) === '[object Function]';
+        //return !!( obj && obj.constructor && obj.call && obj.apply );
+        
+    };
+    
+    _.isArray = Array.isArray || function( obj ){
+        
+        return _.toString.call( obj ) === '[object Array]';
+        
+    };
+    
+    _.forEach = Array.prototype.forEach ?
+        function( arr, fn ){
+            
+            arr.forEach( fn );
+            
+        } :
+        function( arr, fn ){
+            
+            for ( var i = 0, l = arr.length; i < l; i++ ){
+                fn( arr[i] );
+            }
+            
+        };
+    
+    _.extend = function( target, o ){
+        
+        if ( o === undefined ){
+            return;
+        }
+        
+        for ( var name in o ){
+            if ( o[name] !== undefined ){
+                target[name] = o[name];
+            }
+        }
+        //return target;
+        
+    };
+    
+    _.isReady = 0,
+    _.isBind = 0,
+    _.readyList = [],
+    _.testEl = doc.documentElement;
+    
+    _.readyInit = function(){
+        
+        _.isReady = 1;
+
+        if ( !doc.body ){
+            setTimeout( arguments.callee, 10 );
+            return;
+        }
+        
+        for ( var i = 0, l = _.readyList.length; i < l; i++ ){
+            _.readyList[i]();
+        }
+        
+        _.readyList = [];
+    };
+    
+    _.bindReady = function(){
+        
+        if ( _.isBind ){
+            return;
+        }
+        _.isBind = 1;
+
+        if ( 'complete' === doc.readyState ){
+            _.readyInit();
+        } else if ( doc.addEventListener ){
+            doc.addEventListener( 'DOMContentLoaded', function(){
+                doc.removeEventListener( 'DOMContentLoaded', arguments.callee, false );
+                _.readyInit();
+            }, false );
+            
+            global.addEventListener( 'onload', _.readyInit, false );
+        } else if( doc.attachEvent ){
+            // In IE, ensure firing before onload, maybe late but safe also for iframes.
+            doc.attachEvent( 'onreadystatechange', function(){
+                if ( 'complete' === doc.readyState ) {
+                    doc.detachEvent( 'onreadystatechange', arguments.callee );
+                    _.readyInit();
+                }
+            });
+            
+            global.attachEvent( 'onload', _.readyInit );
+
+            // If IE and not a frame, continually check to see if the doc is ready.
+			if ( _.testEl.doScroll && global == global.top ) {
+				_.doScrollCheck();
+			}
+        }
+    };
+    
+    _.doScrollCheck = function(){
+        
+        if ( _.isReady ){
+            return;
+        }
+        
+        try {
+            // If IE is used, use the trick by Diego Perini
+            // http://javascript.nwbox.com/IEContentLoaded/
+            _testEl.doScroll( 'left' );
+        } catch(e) {
+            setTimeout( _.doScrollCheck, 1 );
+            return;
+        }
+        
+        _.readyInit();
+        
+    };
+    
+    _.ready = function( fn ){
+        
+        _.bindReady();
+        
+        if ( _.isReady ){
+            fn();
+        } else {
+            _.readyList.push( fn );
+        }
+        
+    };
+    
+    /**
+     * Ref.
+     * 
+     * */
+    _.messageList = [];
+    _.messageBox = null;
+    _.prepared = false;
+    _.createMessage = function( item ){
+        var li = doc.createElement('li');
+        'warn' === item.type ? li.style.color = 'red' : li.style.color = '#000';
+        li.innerHTML = item.message;
+        _.messageBox.appendChild( li );
+    };
+    _.messagePrepare = function(){
+        
+        _.ready(function(){
+            var box = doc.createElement('div');
+            box.id = 'hexjs-debug';
+            box.style.margin = '10px 0';
+            box.style.border = '1px dashed red';
+            box.style.padding = '4px 8px';
+            box.style.fontSize = '14px';
+            box.style.lineHeight = '1.5';
+            doc.body.appendChild( box );
+            _.messageBox = doc.createElement('ol');
+            _.messageBox.style.listStyleType = 'decimal';
+            box.appendChild( _.messageBox );
+            _.forEach( _.messageList, function( item ){
+                _.createMessage( item );
+            } );
+        });
+        _.prepared = true;
+    };
+    _.console = function( message, type ){
+        
+        var item = {
+            'message': message,
+            'type': type
+        };
+        
+        !_.prepared && _.messagePrepare();
+        _.messageBox ?
+            _.createMessage( item ) :
+            _.messageList.push( item );
+        
+    };
     
     /**
      * output message
      * @param {string} message
      * @param {string} message type
      * */
-    var _log = function( message, type ){
+    _.log = function( message, type ){
         
         if ( !!global.console ){
-            _log = function( message, type ){
-                type = type || 'info';
+            _.log = function( message, type ){
                 global.console[type]( message );
             };
         } else {
-            _log = function( message, type ){
-                $.log( message );
+            _.log = function( message, type ){
+                _.console( message, type );
             };
         }
         
-        _log( message, type );
+        _.log( message, type );
         
     };
     
@@ -72,11 +252,11 @@
         
         // if id already exists, return
         if ( _modules[id] ){
-            _isLog && _log( $.now() + ': the module "' + id + '" already exists. ' );
+            _isDebug && _.log( _.now() + ': the module "' + id + '" already exists. ', 'warn' );
             return null;
         }
         
-        if ( $.isFunction(fn) ){
+        if ( _.isFunction( fn ) ){
             fn = { init: fn };
         }
         
@@ -105,8 +285,8 @@
             ids,
             isReady;
         
-        if ( $.isArray( id ) ){
-            $.each( id, function( i, item ){
+        if ( _.isArray( id ) ){
+            _.forEach( id, function( item ){
                 args.callee( item );
             } );
             return;
@@ -121,7 +301,7 @@
             id = ids[1];
         }
         
-        if ( !module || !(module instanceof _Module) ){
+        if ( !module || !( module instanceof _Module ) ){
             module = _modules[id];
         }
         
@@ -132,10 +312,10 @@
         module.once = true;
         
         isReady ?
-            $(document).ready(function(){
-                _execute( module, 'after ready' );
+            _.ready(function(){
+                _execute( module, 'register', 'after ready' );
             }) :
-            _execute( module, 'now' );
+            _execute( module, 'register', 'now' );
         
     };
     
@@ -175,7 +355,7 @@
 
         if ( !module.once || refresh ){
             module.once = true;
-            _exports( module );
+            _execute( module, 'require' );
         }
         
         return module.exports;
@@ -185,40 +365,36 @@
     /**
      * execute module
      * @param {object} module
-     * @param {string} running status
+     * @param {string} execute type
+     * @param {string} execute status
      * */
-    var _execute = function( module, status ){
-        
-        try {
-            module.fn.init( _require, module.exports, module );
-            
-            if ( module.id === '' ){
-                _isLog && _log( $.now() + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execute.' );
-                return;
-            }
-            
-            _isLog && _log( $.now() + ': the module "' + module.id + '" registered. ' + status + ' execute.' );
-        } catch(e) {
-            _isLog && _log( $.now() + ': the module "' + module.id + '" failed to register.', 'warn' );
-        }
-        
-    };
-    
-    
-    /**
-     * module exports
-     * @param {object} module
-     * */
-    var _exports = function( module ){
+    var _execute = function( module, type, status ){
         
         try {
             var exports = module.fn.init( _require, module.exports, module );
             
-            module.exports = $.extend( module.exports, exports );
+            _.extend( module.exports, exports );
             
-            _isLog && _log( $.now() + ': the module "' + module.id + '" required.' );
+            if ( '' === module.id ){
+                _isDebug && _.log( _.now() + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execute.', 'info' );
+                return;
+            }
+            
+            _isDebug &&
+                'register' === type ?
+                    _.log( _.now() + ': the module "' + module.id + '" registered. ' + status + ' execute.', 'info' ) :
+                    _.log( _.now() + ': the module "' + module.id + '" required.', 'info' );
         } catch(e) {
-            _isLog && _log( $.now() + ': the module "' + module.id + '" failed to require.', 'warn' );
+            
+            if ( '' === module.id ){
+                _isDebug && _.log( _.now() + ': the module anonymous_' + module._idx + ' failed to register. ' + status + ' execute.', 'warn' );
+                return;
+            }
+            
+            _isDebug &&
+                'register' === type ?
+                    _.log( _.now() + ': the module "' + module.id + '" failed to register.', 'warn' ) :
+                    _.log( _.now() + ': the module "' + module.id + '" failed to require.', 'warn' );
         }
         
     };
@@ -229,4 +405,4 @@
     
     global.hexjs = _hexjs;
     
-})( jQuery, this );
+})( this, document );
