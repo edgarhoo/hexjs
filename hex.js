@@ -2,7 +2,7 @@
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
  * @version v0.2
- * @build   111025
+ * @build   111027
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * */
@@ -10,33 +10,35 @@
 !!this.hexjs || (function( global, doc ){
     
     var _ = {},
+        _lang = {},
+        _util = {},
         _hexjs = {},
         _modules = {},
         _anonymousModules = [],
         _isDebug = global.location.search.indexOf('hexjs.debug=true') > -1;
     
-    _.toString = Object.prototype.toString;
+    _lang.toString = Object.prototype.toString;
     
-    _.now = Date.now || function(){
+    _lang.now = Date.now || function(){
         
         return new Date().getTime();
         
     };
     
-    _.isFunction = function( obj ){
+    _lang.isFunction = function( obj ){
         
-        return _.toString.call( obj ) === '[object Function]';
+        return _lang.toString.call( obj ) === '[object Function]';
         //return !!( obj && obj.constructor && obj.call && obj.apply );
         
     };
     
-    _.isArray = Array.isArray || function( obj ){
+    _lang.isArray = Array.isArray || function( obj ){
         
-        return _.toString.call( obj ) === '[object Array]';
+        return _lang.toString.call( obj ) === '[object Array]';
         
     };
     
-    _.forEach = Array.prototype.forEach ?
+    _lang.forEach = Array.prototype.forEach ?
         function( arr, fn ){
             
             arr.forEach( fn );
@@ -50,7 +52,7 @@
             
         };
     
-    _.extend = function( target, o ){
+    _util.extend = function( target, o ){
         
         if ( o === undefined ){
             return;
@@ -65,9 +67,16 @@
         
     };
     
-    _.isReady = 0,
-    _.isBind = 0,
-    _.readyList = [],
+    
+    /**
+     * Ref.
+     * */
+    _.isReady = 0;
+    
+    _.isBind = 0;
+    
+    _.readyList = [];
+    
     _.testEl = doc.documentElement;
     
     _.readyInit = function(){
@@ -88,11 +97,6 @@
     
     _.bindReady = function(){
         
-        if ( _.isBind ){
-            return;
-        }
-        _.isBind = 1;
-
         if ( 'complete' === doc.readyState ){
             _.readyInit();
         } else if ( doc.addEventListener ){
@@ -101,7 +105,7 @@
                 _.readyInit();
             }, false );
             
-            global.addEventListener( 'onload', _.readyInit, false );
+            global.addEventListener( 'load', _.readyInit, false );
         } else if( doc.attachEvent ){
             // In IE, ensure firing before onload, maybe late but safe also for iframes.
             doc.attachEvent( 'onreadystatechange', function(){
@@ -129,7 +133,7 @@
         try {
             // If IE is used, use the trick by Diego Perini
             // http://javascript.nwbox.com/IEContentLoaded/
-            _testEl.doScroll( 'left' );
+            _.testEl.doScroll( 'left' );
         } catch(e) {
             setTimeout( _.doScrollCheck, 1 );
             return;
@@ -139,14 +143,15 @@
         
     };
     
-    _.ready = function( fn ){
+    _util.ready = function( fn ){
         
-        _.bindReady();
+        _.readyList.push( fn );
         
         if ( _.isReady ){
             fn();
-        } else {
-            _.readyList.push( fn );
+        } else if ( !_.isBind ){
+            _.isBind = 1;
+            _.bindReady();
         }
         
     };
@@ -156,17 +161,21 @@
      * 
      * */
     _.messageList = [];
+    
     _.messageBox = null;
+    
     _.prepared = false;
+    
     _.createMessage = function( item ){
         var li = doc.createElement('li');
         'warn' === item.type ? li.style.color = 'red' : li.style.color = '#000';
         li.innerHTML = item.message;
         _.messageBox.appendChild( li );
     };
+    
     _.messagePrepare = function(){
         
-        _.ready(function(){
+        _util.ready(function(){
             var box = doc.createElement('div');
             box.id = 'hexjs-debug';
             box.style.margin = '10px 0';
@@ -174,17 +183,20 @@
             box.style.padding = '4px 8px';
             box.style.fontSize = '14px';
             box.style.lineHeight = '1.5';
+            box.style.textAlign = 'left';
             doc.body.appendChild( box );
             _.messageBox = doc.createElement('ol');
             _.messageBox.style.listStyleType = 'decimal';
             box.appendChild( _.messageBox );
-            _.forEach( _.messageList, function( item ){
+            _lang.forEach( _.messageList, function( item ){
                 _.createMessage( item );
             } );
         });
+        
         _.prepared = true;
     };
-    _.console = function( message, type ){
+    
+    _util.console = function( message, type ){
         
         var item = {
             'message': message,
@@ -203,19 +215,19 @@
      * @param {string} message
      * @param {string} message type
      * */
-    _.log = function( message, type ){
+    var _log = function( message, type ){
         
         if ( !!global.console ){
-            _.log = function( message, type ){
+            _log = function( message, type ){
                 global.console[type]( message );
             };
         } else {
-            _.log = function( message, type ){
-                _.console( message, type );
+            _log = function( message, type ){
+                _util.console( message, type );
             };
         }
         
-        _.log( message, type );
+        _log( message, type );
         
     };
     
@@ -252,11 +264,11 @@
         
         // if id already exists, return
         if ( _modules[id] ){
-            _isDebug && _.log( _.now() + ': the module "' + id + '" already exists. ', 'warn' );
+            _isDebug && _log( _lang.now() + ': the module "' + id + '" already exists. ', 'warn' );
             return null;
         }
         
-        if ( _.isFunction( fn ) ){
+        if ( _lang.isFunction( fn ) ){
             fn = { init: fn };
         }
         
@@ -285,8 +297,8 @@
             ids,
             isReady;
         
-        if ( _.isArray( id ) ){
-            _.forEach( id, function( item ){
+        if ( _lang.isArray( id ) ){
+            _lang.forEach( id, function( item ){
                 args.callee( item );
             } );
             return;
@@ -312,7 +324,7 @@
         module.once = true;
         
         isReady ?
-            _.ready(function(){
+            _util.ready(function(){
                 _execute( module, 'register', 'after ready' );
             }) :
             _execute( module, 'register', 'now' );
@@ -373,28 +385,32 @@
         try {
             var exports = module.fn.init( _require, module.exports, module );
             
-            _.extend( module.exports, exports );
+            _util.extend( module.exports, exports );
             
-            if ( '' === module.id ){
-                _isDebug && _.log( _.now() + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execute.', 'info' );
-                return;
+            if ( _isDebug ){
+                if ( '' === module.id ){
+                    _log( _lang.now() + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execute.', 'info' );
+                    return;
+                }
+                
+                'register' === type ?
+                    _log( _lang.now() + ': the module "' + module.id + '" registered. ' + status + ' execute.', 'info' ) :
+                    _log( _lang.now() + ': the module "' + module.id + '" required.', 'info' );
             }
             
-            _isDebug &&
-                'register' === type ?
-                    _.log( _.now() + ': the module "' + module.id + '" registered. ' + status + ' execute.', 'info' ) :
-                    _.log( _.now() + ': the module "' + module.id + '" required.', 'info' );
         } catch(e) {
             
-            if ( '' === module.id ){
-                _isDebug && _.log( _.now() + ': the module anonymous_' + module._idx + ' failed to register. ' + status + ' execute.', 'warn' );
-                return;
+            if ( _isDebug ){
+                if ( '' === module.id ){
+                    _log( _lang.now() + ': the module anonymous_' + module._idx + ' failed to register. ' + status + ' execute.', 'warn' );
+                    return;
+                }
+                
+                'register' === type ?
+                    _log( _lang.now() + ': the module "' + module.id + '" failed to register.', 'warn' ) :
+                    _log( _lang.now() + ': the module "' + module.id + '" failed to require.', 'warn' );
             }
             
-            _isDebug &&
-                'register' === type ?
-                    _.log( _.now() + ': the module "' + module.id + '" failed to register.', 'warn' ) :
-                    _.log( _.now() + ': the module "' + module.id + '" failed to require.', 'warn' );
         }
         
     };
