@@ -3,8 +3,8 @@
     <head>
         <meta charset="utf-8"/>
         <title>HexJS Unit Testing</title>
-        <script src="http://static.c.aliimg.com/js/lib/fdev-v4/core/fdev-min.js"></script>
-        <script src="src/hex.fdev4.js"></script>
+        <script src="../build/hex-min.js"></script>
+        <script src="http://static.edgar.im/sys/jquery/jquery.js"></script>
         <script>
             /**
              * @module hexjs-test
@@ -14,7 +14,7 @@
                 var $result = jQuery('#test-result');
                 
                 var createItem = function( inner, color ){
-                    return jQuery('<li style="color:'+color+'"/>').html(inner).appendTo($result);
+                    jQuery('<li style="color:'+color+'"/>').html(inner).appendTo($result);
                 };
                 
                 exports.print = function( msg, fn ){
@@ -54,7 +54,7 @@
                 require('hexjs-test').print( true, 'register-multi-b' );
             } );
             hexjs.define( 'register-multi-c', function( require, exports, module ){
-                !!console && console.info('register-multi-b pass.');
+                !!window.console && console.info('register-multi-b pass.');
             } );
 
 
@@ -150,6 +150,20 @@
             } );
             
             
+            /**
+             * @module noConflict false
+             * */
+            hexjs.define( 'noConflict-false', function(){
+                hexjs.noConflict(false);
+            } );
+            hexjs.define( 'noConflict-true', function(){
+                hexjs.noConflict(true);
+            } );
+            hexjs.define( 'noConflict-undefined', function(){
+                window.hexjsTemp = hexjs.noConflict();
+            } );
+            
+            
             
             hexjs.register('register-ready');
             
@@ -199,6 +213,25 @@
                 require('module-constructor');
                 require('hexjs-test').print( module.getId() === 'module-constructor', 'module-constructor');
             } ).register();
+            
+            hexjs.define(function(require){
+                hexjs.register('~noConflict-false');
+                require('hexjs-test').print( define === hexjs.define && register === hexjs.register, 'noConflict-false' );
+            }).register();
+            
+            hexjs.define(function(require){
+                hexjs.register('~noConflict-true');
+                require('hexjs-test').print( define !== hexjs.define && register !== hexjs.register, 'noConflict-true' );
+                delete define;
+                delete register;
+            }).register();
+            
+            hexjs.define(function(require){
+                hexjs.register('~noConflict-undefined');
+                require('hexjs-test').print( hexjs === undefined, 'noConflict-undefined' );
+                window.hexjs = hexjsTemp;
+                delete hexjsTemp;
+            }).register();
         </script>
     </head>
     <body style="width:800px;margin:0 auto;">
@@ -206,8 +239,6 @@
         <ul id="test-result">
             
         </ul>
-        <!--
         <script src="http://static.edgar.im/app/ga/org.js"></script>
-        -->
     </body>
 </html>

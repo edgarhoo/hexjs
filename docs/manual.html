@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>HexJS Manual</title>
+        <meta name="author" content="Edgar Hoo, edgarhoo.net"/>
+        <meta name="date" content="Oct 31, 2011"/>
+        <link rel="stylesheet" href="http://static.edgar.im/sys/highlight/sh.css"/>
+    </head>
+    <body>
+        <h1>HexJS Manual</h1>
+        <nav>
+            <ul>
+                <li><a href="https://github.com/edgarhoo/hexjs">Git Repo</a></li>
+                <li><a href="manual.zh-cn.html">使用手册</a></li>
+                <li><a href="../test/unit.testing.html?hexjs.debug=true">Unit Testing</a></li>
+            </ul>
+        </nav>
+        <article>
+            <h1>define</h1>
+            <pre class="sh_js">
+    // define a module with function
+    hexjs.define( 'module-name', function( require, exports, module ){
+        //todo something
+    } );
+            </pre>
+            <pre class="sh_js">
+    // define a module with object,  but it must contain a function called 'init'
+    hexjs.define( 'module-name', {
+        init: function( require, exports, module ){
+            //todo something
+        },
+        _other: function(){}
+    } );
+            </pre>
+            <pre class="sh_js">
+    // define an anonymous module
+    hexjs.define( function( require, exports, module ){
+        //todo something
+    } );
+            </pre>
+        </article>
+        <article>
+            <h1>register</h1>
+            <pre class="sh_js">
+    // register a module, and it will be executed after ready
+    hexjs.register('module-name');
+            </pre>
+            <pre class="sh_js">
+    // register a module, and it will be executed now
+    // add a tilde(~) before the module name
+    hexjs.register('~module-name');
+            </pre>
+            <pre class="sh_js">
+    // register an anonymous module, and it will be executed after ready
+    hexjs.define( function( require, exports, module ){
+        //todo something
+    } ).register();
+            </pre>
+            <pre class="sh_js">
+    // register an anonymous module, and it will be executed now
+    hexjs.define( function( require, exports, module ){
+        //todo something
+    } ).register('~');
+            </pre>
+        </article>
+        <article>
+            <h1>exports</h1>
+            <pre class="sh_js">
+    // output API from exports
+    hexjs.define( 'module-a', function( require, exports, module ){
+        exports.a = new Date().getTime(); // --> 1314289663337
+    } );
+            </pre>
+            <pre class="sh_js">
+    // output API from return
+    hexjs.define( 'module-b', function( require, exports, module ){
+        return {
+            b: 'bbb'
+        }
+    } );
+            </pre>
+            <pre class="sh_js">
+    // output from return will cover form exports
+    hexjs.define( 'module-c', function( require, exports, module ){
+        exports.c = '111';
+        return {
+            c: 'ccc'
+        }
+    } );
+            </pre>
+            <pre class="sh_js wrong">
+    // not covered the exports
+    hexjs.define( 'module-c', function( require, exports, module ){
+        exports = {
+            a: '111'
+        };
+    } );
+            </pre>
+        </article>
+        <article>
+            <h1>require</h1>
+            <pre class="sh_js">
+    // require module-a
+    hexjs.define( 'module-name', function( require, exports, module ){
+        var a = require('module-a');
+        // a.a --> '1314289663337'
+    } );
+            </pre>
+            <pre class="sh_js">
+    // set the re-run option is 'true', the module will executed again, and covering the original results
+    hexjs.define( 'module-name', function( require, exports, module ){
+        var a = require('module-a', true);
+        // a.a --> '1314289701153'
+    } );
+            </pre>
+        </article>
+        <article>
+            <h1>module</h1>
+            <h2>module.id</h2>
+            <pre class="sh_js">
+    // module.id returns the current module name
+    hexjs.define( 'module-d', function( require, exports, module ){
+        console.info( module.id ); // --> module-d
+    } );
+            </pre>
+            <h2>module.exports</h2>
+            <pre class="sh_js">
+    // output API from module.exports
+    hexjs.define( 'module-e', function( require, exports, module ){
+        module.exports = {
+            a: 'aaa'
+        };
+    } );
+            </pre>
+            <h2>module.constructor</h2>
+            <pre class="sh_js">
+    // add some method or property to the module constructor
+    hexjs.define( 'module-constructor', function( require, exports, module ){
+        var M = module.constructor;
+        
+        M.prototype.getId = function(){
+            return module.id;
+        };
+    } );
+    
+    hexjs.define(function(require, exports, module ){
+        require('module-constructor');
+        console.info( module.getId() ); // --> 'module-constructor'
+    } ).register();
+            </pre>
+        </article>
+        <article>
+            <h1>noConflict</h1>
+            <h2>hexjs.noConflict()</h2>
+            <pre class="sh_js">
+    // you can use 'myHexjs' as 'hexjs'
+    var myHexjs = hexjs.noConflict();
+    myHexjs.define( 'module-name', function(){ ... } );
+    myHexjs.register('module-name');
+            </pre>
+            <h2>hexjs.noConflict(false)</h2>
+            <pre class="sh_js">
+    // you can use 'define' as 'hexjs.define' and use 'register' as 'hexjs.register'
+    hexjs.noConflict(false);
+    define( 'module-name', function(){ ... } );
+    register('module-name');
+            </pre>
+            <h2>hexjs.noConflict(true)</h2>
+            <pre class="sh_js">
+    // free up 'define' and 'register'
+    hexjs.noConflict(true);
+            </pre>
+        </article>
+        <article>
+            <h1>debug</h1>
+            <pre class="sh_html">
+    &lt;!-- when accessing the page with 'hexjs.debug=ture', enters debug mode -->
+    <a href="http://hexjs.edgarhoo.org/test/unit.testing.html?hexjs.debug=true">http://hexjs.edgarhoo.org/test/unit.testing.html?hexjs.debug=true</a>
+            </pre>
+        </article>
+        <script src="http://static.edgar.im/sys/highlight/sh.js"></script>
+        <script src="http://static.edgar.im/app/ga/org.js"></script>
+    </body>
+</html>

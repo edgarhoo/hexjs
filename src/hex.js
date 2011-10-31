@@ -164,7 +164,7 @@
     
     /**
      * Ref:
-     * http://
+     * http://jquery.glyphix.com/jquery.debug/jquery.debug.js
      * */
     _.messageList = [];
     

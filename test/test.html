@@ -6,8 +6,8 @@
         <style>
         p{margin:0;line-height:1.5;}
         </style>
-        <script src="hex.js"></script>
-        <script src="http://static.c.aliimg.com/js/lib/fdev-v4/core/fdev-min.js"></script>
+        <script src="../build/hex-min.js"></script>
+        <script src="http://static.edgar.im/sys/jquery/jquery.js"></script>
         <script>
             hexjs.define( 'test', function( require, exports ){
                 var $result = jQuery('#output');
@@ -71,7 +71,7 @@
             //a.define(function(require){require('test').print('noConflict is ok')}).register();
             
             //var a = hexjs.noConflict(true);
-            hexjs.noConflict(true);
+            //hexjs.noConflict();
             //define(function(require){require('test').print('noConflict is ok')}).register();
             //a.noConflict(false);
         </script>
@@ -81,8 +81,6 @@
         <div id="output">
             
         </div>
-        <!--
         <script src="http://static.edgar.im/app/ga/org.js"></script>
-        -->
     </body>
 </html>
