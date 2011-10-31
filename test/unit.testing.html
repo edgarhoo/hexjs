@@ -222,15 +222,15 @@
             hexjs.define(function(require){
                 hexjs.register('~noConflict-true');
                 require('hexjs-test').print( define !== hexjs.define && register !== hexjs.register, 'noConflict-true' );
-                delete define;
-                delete register;
+                //delete window.define;
+                //delete window.register;
             }).register();
             
             hexjs.define(function(require){
                 hexjs.register('~noConflict-undefined');
                 require('hexjs-test').print( hexjs === undefined, 'noConflict-undefined' );
                 window.hexjs = hexjsTemp;
-                delete hexjsTemp;
+                //delete window.hexjsTemp;
             }).register();
         </script>
     </head>
