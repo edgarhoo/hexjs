@@ -4,7 +4,7 @@
         <meta charset="utf-8"/>
         <title>HexJS Unit Testing</title>
         <script src="http://static.c.aliimg.com/js/lib/fdev-v4/core/fdev-min.js"></script>
-        <script src="../build/hex.fdev4-min.js"></script>
+        <script src="../src/hex.fdev4.js"></script>
         <script>
             /**
              * @module hexjs-test
@@ -28,6 +28,18 @@
             } );
 
 
+            /**
+             * @module repeat-define
+             * */
+            hexjs.define( 'repeat-define', function( require, exports ){
+                exports.variable = 'repeat';
+            } );
+            
+            hexjs.define( 'repeat-define', function( require, exports ){
+                exports.variable = 'define';
+            } );
+            
+            
             /**
              * @module register-ready
              * */
@@ -162,6 +174,10 @@
             }).register();
             
             hexjs.register( ['register-multi-a','register-multi-b','register-multi-c'] );
+            
+            hexjs.define(function(require){
+                require('hexjs-test').print( require('repeat-define').variable === 'repeat', 'not-repeat-define' );
+            }).register();
             
             hexjs.define(function(require){
                 require('require').print( true, 'require');

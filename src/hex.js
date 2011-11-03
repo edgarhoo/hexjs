@@ -1,8 +1,8 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.2
- * @build   111030
+ * @version v0.2.1
+ * @build   111103
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * */
@@ -394,36 +394,40 @@
             _util.extend( module.exports, exports );
             
             if ( _isDebug ){
+                var now = _lang.now();
                 if ( '' === module.id ){
-                    _log( _lang.now() + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execute.', 'info' );
+                    _log( now + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execute.', 'info' );
                     return;
                 }
                 
                 'register' === type ?
-                    _log( _lang.now() + ': the module "' + module.id + '" registered. ' + status + ' execute.', 'info' ) :
-                    _log( _lang.now() + ': the module "' + module.id + '" required.', 'info' );
+                    _log( now + ': the module "' + module.id + '" registered. ' + status + ' execute.', 'info' ) :
+                    _log( now + ': the module "' + module.id + '" required.', 'info' );
             }
             
         } catch(e) {
             
             if ( _isDebug ){
+                var now = _lang.now();
                 if ( '' === module.id ){
-                    _log( _lang.now() + ': the module anonymous_' + module._idx + ' failed to register. ' + status + ' execute.', 'warn' );
+                    _log( now + ': the module anonymous_' + module._idx + ' failed to register. ' + status + ' execute.', 'warn' );
                     return;
                 }
                 
                 'register' === type ?
-                    _log( _lang.now() + ': the module "' + module.id + '" failed to register.', 'warn' ) :
-                    _log( _lang.now() + ': the module "' + module.id + '" failed to require.', 'warn' );
+                    _log( now + ': the module "' + module.id + '" failed to register.', 'warn' ) :
+                    _log( now + ': the module "' + module.id + '" failed to require.', 'warn' );
             }
             
         }
         
     };
     
+    
     _._hexjs = global.hexjs;
     _._define = global.define;
     _._register = global.register;
+    
     
     /**
      * no conflict
@@ -452,10 +456,11 @@
         
     };
     
+    
     _hexjs.define = define;
     _hexjs.register = register;
     _hexjs.noConflict = noConflict;
-    _hexjs.version = '0.2';
+    _hexjs.version = '0.2.1';
     
     global.hexjs = _hexjs;
     

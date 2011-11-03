@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8"/>
         <title>HexJS Unit Testing</title>
-        <script src="../build/hex-min.js"></script>
+        <script src="../src/hex.js"></script>
         <script src="http://static.edgar.im/sys/jquery/jquery.js"></script>
         <script>
             /**
@@ -28,6 +28,18 @@
             } );
 
 
+            /**
+             * @module repeat-define
+             * */
+            hexjs.define( 'repeat-define', function( require, exports ){
+                exports.variable = 'repeat';
+            } );
+            
+            hexjs.define( 'repeat-define', function( require, exports ){
+                exports.variable = 'define';
+            } );
+            
+            
             /**
              * @module register-ready
              * */
@@ -62,7 +74,7 @@
              * @module require
              * */
             hexjs.define( 'require', function( require, exports, module ){
-                return require('hexjs-test')
+                return require('hexjs-test');
             } );
 
             /**
@@ -151,7 +163,7 @@
             
             
             /**
-             * @module noConflict false
+             * @module noConflict
              * */
             hexjs.define( 'noConflict-false', function(){
                 hexjs.noConflict(false);
@@ -162,7 +174,6 @@
             hexjs.define( 'noConflict-undefined', function(){
                 window.hexjsTemp = hexjs.noConflict();
             } );
-            
             
             
             hexjs.register('register-ready');
@@ -176,6 +187,10 @@
             }).register();
             
             hexjs.register( ['register-multi-a','register-multi-b','register-multi-c'] );
+            
+            hexjs.define(function(require){
+                require('hexjs-test').print( require('repeat-define').variable === 'repeat', 'not-repeat-define' );
+            }).register();
             
             hexjs.define(function(require){
                 require('require').print( true, 'require');
@@ -209,7 +224,7 @@
                 require('hexjs-test').print( require('module-id').id === 'module-id', 'module-id');
             } ).register();
             
-            hexjs.define(function(require, exports, module ){
+            hexjs.define(function(require,exports,module){
                 require('module-constructor');
                 require('hexjs-test').print( module.getId() === 'module-constructor', 'module-constructor');
             } ).register();
@@ -222,15 +237,12 @@
             hexjs.define(function(require){
                 hexjs.register('~noConflict-true');
                 require('hexjs-test').print( define !== hexjs.define && register !== hexjs.register, 'noConflict-true' );
-                //delete window.define;
-                //delete window.register;
             }).register();
             
             hexjs.define(function(require){
                 hexjs.register('~noConflict-undefined');
                 require('hexjs-test').print( hexjs === undefined, 'noConflict-undefined' );
                 window.hexjs = hexjsTemp;
-                //delete window.hexjsTemp;
             }).register();
         </script>
     </head>

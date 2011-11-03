@@ -1,8 +1,8 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.2
- * @build   111030
+ * @version v0.2.1
+ * @build   111103
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * 
@@ -14,7 +14,7 @@
     var _hexjs = {},
         _modules = {},
         _anonymousModules = [],
-        _isDebug = !!$.util.debug || global.location.search.indexOf('hexjs.debug=true') > -1;
+        _isDebug = global.location.search.indexOf('hexjs.debug=true') > -1;
     
     
     /**
@@ -73,7 +73,7 @@
         
         // if id already exists, return
         if ( _modules[id] ){
-            _isLog && _log( $.now() + ': the module "' + id + '" already exists. ' );
+            _isDebug && _log( $.now() + ': the module "' + id + '" already exists. ', 'warn' );
             return null;
         }
         
@@ -197,27 +197,29 @@
             exports === undefined || $.extend( module.exports, exports );
             
             if ( _isDebug ){
+                var now = $.now();
                 if ( '' === module.id ){
-                    _log( $.now() + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execute.', 'info' );
+                    _log( now + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execute.', 'info' );
                     return;
                 }
                 
                 'register' === type ?
-                    _log( $.now() + ': the module "' + module.id + '" registered. ' + status + ' execute.', 'info' ) :
-                    _log( $.now() + ': the module "' + module.id + '" required.', 'info' );
+                    _log( now + ': the module "' + module.id + '" registered. ' + status + ' execute.', 'info' ) :
+                    _log( now + ': the module "' + module.id + '" required.', 'info' );
             }
             
         } catch(e) {
             
             if ( _isDebug ){
+                var now = $.now();
                 if ( '' === module.id ){
-                    _log( $.now() + ': the module anonymous_' + module._idx + ' failed to register. ' + status + ' execute.', 'warn' );
+                    _log( now + ': the module anonymous_' + module._idx + ' failed to register. ' + status + ' execute.', 'warn' );
                     return;
                 }
                 
                 'register' === type ?
-                    _log( $.now() + ': the module "' + module.id + '" failed to register.', 'warn' ) :
-                    _log( $.now() + ': the module "' + module.id + '" failed to require.', 'warn' );
+                    _log( now + ': the module "' + module.id + '" failed to register.', 'warn' ) :
+                    _log( now + ': the module "' + module.id + '" failed to require.', 'warn' );
             }
             
         }
@@ -227,7 +229,7 @@
     
     _hexjs.define = define;
     _hexjs.register = register;
-    _hexjs.version = '0.2';
+    _hexjs.version = '0.2.1';
     
     global.hexjs = _hexjs;
     
