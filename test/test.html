@@ -10,10 +10,10 @@
         <script src="http://static.edgar.im/sys/jquery/jquery.js"></script>
         <script>
             hexjs.define( 'test', function( require, exports ){
-                var $result = jQuery('#output');
+                var $output = jQuery('#output');
                 
                 var createItem = function( inner ){
-                    return jQuery('<p/>').html(inner).appendTo($result);
+                    return jQuery('<p/>').html(inner).appendTo($output);
                 };
                 
                 exports.print = function( message ){
@@ -66,6 +66,24 @@
                 test.print( Date.now() + ' module d end' );
             }).register();
             
+            hexjs.define( 'ca', function( require, exports ){
+                exports.variable = 0;
+            } );
+            hexjs.define( 'cb', function( require ){
+                var a = require('ca');
+                a.variable = 1;
+            } );
+            hexjs.define( 'cc', function( require ){
+                require('ca').variable2 = 2;
+            } );
+            hexjs.define(function(require){
+                var test = require('test');
+                test.print('<strong>测试修改所require的module的输出API</strong>');
+                require('cb');
+                require('cc');
+                test.print( '在第三方module修改已有的输出API（初始值为0）： ' + require('ca').variable );
+                test.print( '在第三方module增加输出API： ' + require('ca').variable2 );
+            }).register();
         </script>
     </head>
     <body style="width:800px;margin:0 auto;">
