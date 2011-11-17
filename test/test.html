@@ -84,6 +84,30 @@
                 test.print( '在第三方module修改已有的输出API（初始值为0）： ' + require('ca').variable );
                 test.print( '在第三方module增加输出API： ' + require('ca').variable2 );
             }).register();
+            
+            hexjs.define( 'da', {
+                a: 'daa',
+                b: 'dab',
+                c: 'dac'
+            } );
+            hexjs.define(function(require){
+                var da = require('da'),
+                    test = require('test');
+                for ( var i in da ){
+                    test.print( i + ': ' + da[i] );
+                }
+            }).register();
+            
+            hexjs.define(function(require){
+                require.a='aaaa';
+                require = function(id){console.info(id)};
+                console.info(require.toString());
+            }).register('~');
+            
+            hexjs.define(function(require){
+                console.info(require.toString());
+                console.info(require.a);
+            }).register('~');
         </script>
     </head>
     <body style="width:800px;margin:0 auto;">

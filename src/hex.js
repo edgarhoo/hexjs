@@ -1,8 +1,8 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.2.1
- * @build   111103
+ * @version v0.3
+ * @build   111117
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * */
@@ -17,7 +17,7 @@
         _anonymousModules = [],
         _isDebug = global.location.search.indexOf('hexjs.debug=true') > -1;
     
-    _lang.toString = Object.prototype.toString;
+    _toString = {}.toString;
     
     _lang.now = Date.now || function(){
         
@@ -27,14 +27,14 @@
     
     _lang.isFunction = function( obj ){
         
-        return _lang.toString.call( obj ) === '[object Function]';
+        return _toString.call( obj ) === '[object Function]';
         //return !!( obj && obj.constructor && obj.call && obj.apply );
         
     };
     
     _lang.isArray = Array.isArray || function( obj ){
         
-        return _lang.toString.call( obj ) === '[object Array]';
+        return _toString.call( obj ) === '[object Array]';
         
     };
     
@@ -241,13 +241,14 @@
     /**
      * module constructor
      * @param {string} module id
-     * @param {object} module content
+     * @param {object} module factory
      * */
-    var _Module = function( id, fn ){
+    var _Module = function( id, factory ){
         
         this.id = id;
-        this.fn = fn;
+        this.factory = factory;
         this.exports = {};
+        this.clone = function(){};
         this.once = false;
         
     };
@@ -256,15 +257,15 @@
     /**
      * define module
      * @param {string} module id
-     * @param {object|function} module content, function 'init' must exist
+     * @param {object|function} module factory
      * */
-    var define = function( id, fn ){
+    var define = function( id, factory ){
         
         var module,
             anonymousLength;
         
         if ( 'string' !== typeof id ){
-            fn = id;
+            factory = id;
             id = '';
         }
         
@@ -274,11 +275,11 @@
             return null;
         }
         
-        if ( _lang.isFunction( fn ) ){
-            fn = { init: fn };
+        if ( _lang.isFunction( factory ) ){
+            factory = { init: factory };
         }
         
-        module = new _Module( id, fn );
+        module = new _Module( id, factory );
         
         if ( id !== '' ){
             _modules[id] = module;
@@ -297,11 +298,11 @@
      * @param {string} module id
      * @param {object} module
      * */
-    var register = function( id, module ){
+    var _register = function( id, module ){
         
         var args = arguments,
             ids,
-            isReady;
+            isAfterReady;
         
         if ( _lang.isArray( id ) ){
             _lang.forEach( id, function( item ){
@@ -314,7 +315,7 @@
         
         if ( ids.length === 1 ){
             id = ids[0];
-            isReady = true;
+            isAfterReady = true;
         } else {
             id = ids[1];
         }
@@ -329,7 +330,7 @@
         
         module.once = true;
         
-        isReady ?
+        isAfterReady ?
             _util.ready(function(){
                 _execute( module, 'register', 'after ready' );
             }) :
@@ -337,6 +338,12 @@
         
     };
     
+    
+    var register = function( id ){
+        
+        _register.call( null, id );
+        
+    };
     
     /**
      * fn constructor
@@ -349,11 +356,11 @@
     };
     
     
-    _Fn.prototype.register = function( isReady ){
+    _Fn.prototype.register = function( isAfterReady ){
         
-        var id = isReady === '~' ? '~' : '';
+        var id = isAfterReady === '~' ? '~' : '';
         
-        register( id, _anonymousModules[this.idx] );
+        _register.call( null, id, _anonymousModules[this.idx] );
         
     };
     
@@ -363,20 +370,31 @@
      * @param {string} module id
      * @param {boolean} refresh or no
      * */
-    var _require = function( id, refresh ){
+    var __require = function( id, refresh ){
         
         var module = _modules[id];
         
         if ( !module ){
             return;
         }
-
+        
         if ( !module.once || refresh ){
             module.once = true;
             _execute( module, 'require' );
         }
         
-        return module.exports;
+        return new module.clone();
+    };
+    
+    
+    var _Require = function(){
+        
+        function _require( id, refresh ){
+            return __require.call( null, id, refresh );
+        }
+        
+        return _require;
+        
     };
     
     
@@ -389,9 +407,14 @@
     var _execute = function( module, type, status ){
         
         try {
-            var exports = module.fn.init( _require, module.exports, module );
+            if ( _lang.isFunction( module.factory.init ) ){
+                var exports = module.factory.init( _Require(), module.exports, module );
+                _util.extend( module.exports, exports );
+            } else if ( module.factory !== undefined ) {
+                module.exports = module.factory;
+            }
             
-            _util.extend( module.exports, exports );
+            module.clone.prototype = module.exports;
             
             if ( _isDebug ){
                 var now = _lang.now();
@@ -460,7 +483,7 @@
     _hexjs.define = define;
     _hexjs.register = register;
     _hexjs.noConflict = noConflict;
-    _hexjs.version = '0.2.1';
+    _hexjs.version = '0.3';
     
     global.hexjs = _hexjs;
     

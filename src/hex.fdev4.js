@@ -1,8 +1,8 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.2.1
- * @build   111103
+ * @version v0.3
+ * @build   111117
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * 
@@ -44,13 +44,14 @@
     /**
      * module constructor
      * @param {string} module id
-     * @param {object} module content
+     * @param {object} module factory
      * */
-    var _Module = function( id, fn ){
+    var _Module = function( id, factory ){
         
         this.id = id;
-        this.fn = fn;
+        this.factory = factory;
         this.exports = {};
+        this.clone = function(){};
         this.once = false;
         
     };
@@ -59,15 +60,15 @@
     /**
      * define module
      * @param {string} module id
-     * @param {object|function} module content, function 'init' must exist
+     * @param {object|function} module factory
      * */
-    var define = function( id, fn ){
+    var define = function( id, factory ){
         
         var module,
             anonymousLength;
         
         if ( 'string' !== typeof id ){
-            fn = id;
+            factory = id;
             id = '';
         }
         
@@ -77,11 +78,11 @@
             return null;
         }
         
-        if ( $.isFunction(fn) ){
-            fn = { init: fn };
+        if ( $.isFunction( factory ) ){
+            factory = { init: factory };
         }
         
-        module = new _Module( id, fn );
+        module = new _Module( id, factory );
         
         if ( id !== '' ){
             _modules[id] = module;
@@ -100,7 +101,7 @@
      * @param {string} module id
      * @param {object} module
      * */
-    var register = function( id, module ){
+    var _register = function( id, module ){
         
         var args = arguments,
             ids,
@@ -141,6 +142,12 @@
     };
     
     
+    var register = function( id ){
+        
+        _register.call( null, id );
+        
+    };
+    
     /**
      * fn constructor
      * @param {int} anonymous module idx
@@ -156,7 +163,7 @@
         
         var id = isReady === '~' ? '~' : '';
         
-        register( id, _anonymousModules[this.idx] );
+        _register.call( null, id, _anonymousModules[this.idx] );
         
     };
     
@@ -166,7 +173,7 @@
      * @param {string} module id
      * @param {boolean} refresh or no
      * */
-    var _require = function( id, refresh ){
+    var __require = function( id, refresh ){
         
         var module = _modules[id];
         
@@ -179,7 +186,18 @@
             _execute( module, 'require' );
         }
         
-        return module.exports;
+        return new module.clone();
+    };
+    
+    
+    var _Require = function(){
+        
+        function _require( id, refresh ){
+            return __require.call( null, id, refresh );
+        }
+        
+        return _require;
+        
     };
     
     
@@ -192,9 +210,14 @@
     var _execute = function( module, type, status ){
         
         try {
-            var exports = module.fn.init( _require, module.exports, module );
+            if ( $.isFunction( module.factory.init ) ){
+                var exports = module.factory.init( _Require(), module.exports, module );
+                exports === undefined || $.extend( module.exports, exports );
+            } else if ( module.factory !== undefined ) {
+                module.exports = module.factory;
+            }
             
-            exports === undefined || $.extend( module.exports, exports );
+            module.clone.prototype = module.exports;
             
             if ( _isDebug ){
                 var now = $.now();
@@ -229,7 +252,7 @@
     
     _hexjs.define = define;
     _hexjs.register = register;
-    _hexjs.version = '0.2.1';
+    _hexjs.version = '0.3';
     
     global.hexjs = _hexjs;
     

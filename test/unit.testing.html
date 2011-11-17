@@ -55,6 +55,18 @@
 
 
             /**
+             * @module define-object-init
+             * */
+            hexjs.define( 'define-object-init', {
+                init: function( require, exports, module ){
+                    exports.variable = this._variable;
+                },
+                _variable: 'define-object-init'
+                
+            } );
+
+
+            /**
              * @module register-multi
              * */
             hexjs.define( 'register-multi', function( require, exports ){
@@ -95,6 +107,24 @@
             hexjs.define( 'require-refresh', function( require, exports ){
                 exports.variable = require('require-refresh-pre').plus();
             } );
+            
+            /**
+             * @module require-readonly
+             * */
+            hexjs.define( 'require-readonly', function( require ){
+                require.variable = 'require-readonly';
+            } );
+            
+            /**
+             * @module require-value-readonly
+             * */
+            hexjs.define( 'require-value-readonly-pre', function( require, exports ){
+                exports.variable = 0;
+            } );
+            hexjs.define( 'require-value-readonly', function( require, exports ){
+                require('require-value-readonly-pre').variable = 1;
+                exports.variable = require('require-value-readonly-pre').variable;
+            } );
 
             /**
              * @module exports
@@ -111,6 +141,14 @@
                 return {
                     variable: 'exports-return'
                 }
+            } );
+
+
+            /**
+             * @module exports-return-simplify
+             * */
+            hexjs.define( 'exports-return-simplify', {
+                variable: 'exports-return-simplify'
             } );
 
 
@@ -132,18 +170,6 @@
                 module.exports =  {
                     variable: 'module-exports'
                 }
-            } );
-
-
-            /**
-             * @module define-incoming-object
-             * */
-            hexjs.define( 'define-incoming-object', {
-                init: function( require, exports, module ){
-                    exports.variable = this._variable;
-                },
-                _variable: 'define-incoming-object'
-                
             } );
 
 
@@ -197,7 +223,7 @@
             }).register();
             
             hexjs.define(function(require){
-                require('ut').print( require('define-incoming-object').variable === 'define-incoming-object', 'define-incoming-object' );
+                require('ut').print( require('define-object-init').variable === 'define-object-init', 'define-object-init' );
             } ).register();
             
             hexjs.define(function(require){
@@ -209,11 +235,24 @@
             }).register();
             
             hexjs.define(function(require){
+                require('require-readonly');
+                require('ut').print( require.variable !== 'require-readonly', 'require-readonly' );
+            }).register();
+            
+            hexjs.define(function(require){
+                require('ut').print( require('require-value-readonly-pre').variable === require('require-value-readonly').variable, 'require-value-readonly' );
+            }).register();
+            
+            hexjs.define(function(require){
                 require('ut').print( require('exports').variable === 'exports', 'exports' );
             } ).register();
             
             hexjs.define(function(require){
                 require('ut').print( require('exports-return').variable === 'exports-return', 'exports-return' );
+            } ).register();
+            
+            hexjs.define(function(require){
+                require('ut').print( require('exports-return-simplify').variable === 'exports-return-simplify', 'exports-return-simplify' );
             } ).register();
             
             hexjs.define(function(require){
@@ -260,11 +299,14 @@
             <li id="register-ready"></li>
             <li id="register-now"></li>
             <li id="define-not-repeat"></li>
-            <li id="define-incoming-object"></li>
+            <li id="define-object-init"></li>
             <li id="require"></li>
             <li id="require-refresh"></li>
+            <li id="require-readonly"></li>
+            <li id="require-value-readonly"></li>
             <li id="exports"></li>
             <li id="exports-return"></li>
+            <li id="exports-return-simplify"></li>
             <li id="exports-return-cover"></li>
             <li id="module-exports"></li>
             <li id="module-id"></li>
