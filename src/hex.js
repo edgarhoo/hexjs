@@ -223,7 +223,7 @@
      * */
     var _log = function( message, type ){
         
-        if ( !!global.console ){
+        if ( !!global.console && global.console.info ){
             _log = function( message, type ){
                 global.console[type]( message );
             };
