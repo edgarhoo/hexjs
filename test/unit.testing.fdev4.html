@@ -193,6 +193,21 @@
             } );
             
             
+            /**
+             * @module noConflict
+             * */
+            hexjs.define( 'noConflict-false', function(){
+                hexjs.noConflict(false);
+            } );
+            hexjs.define( 'noConflict-true', function(){
+                hexjs.noConflict(true);
+            } );
+            hexjs.define( 'noConflict-undefined', function(){
+                window.hexjsTemp = hexjs.noConflict();
+            } );
+            
+            
+            
             hexjs.register('register-ready');
             
             hexjs.register('~register-now');
@@ -260,6 +275,22 @@
             hexjs.define(function(require){
                 require('ut').print( require('register-multi').get() === 2, 'register-multi' );
             }).register();
+            
+            hexjs.define(function(require){
+                hexjs.register('~noConflict-false');
+                require('ut').print( define === hexjs.define && register === hexjs.register, 'noConflict-false' );
+            }).register();
+            
+            hexjs.define(function(require){
+                hexjs.register('~noConflict-true');
+                require('ut').print( define !== hexjs.define && register !== hexjs.register, 'noConflict-true' );
+            }).register();
+            
+            hexjs.define(function(require){
+                hexjs.register('~noConflict-undefined');
+                require('ut').print( hexjs === undefined, 'noConflict-undefined' );
+                window.hexjs = hexjsTemp;
+            }).register();
         </script>
     </head>
     <body style="width:800px;margin:0 auto;">
@@ -281,6 +312,9 @@
             <li id="module-id"></li>
             <li id="module-constructor"></li>
             <li id="register-multi"></li>
+            <li id="noConflict-false"></li>
+            <li id="noConflict-true"></li>
+            <li id="noConflict-undefined"></li>
         </ul>
         <script src="http://static.edgarhoo.net/app/ga/org.js"></script>
     </body>

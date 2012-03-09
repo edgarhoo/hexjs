@@ -1,8 +1,8 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.3
- * @build   111117
+ * @version v0.3.1
+ * @build   120309
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * */
@@ -12,12 +12,19 @@
     var _ = {},
         _lang = {},
         _util = {},
+        
         _hexjs = {},
         _modules = {},
         _anonymousModules = [],
-        _isDebug = global.location.search.indexOf('hexjs.debug=true') > -1;
+        _isDebug = global.location.search.indexOf('hexjs.debug=true') > -1,
     
     _toString = {}.toString;
+    
+    
+    _._hexjs = global.hexjs;
+    _._define = global.define;
+    _._register = global.register;
+
     
     _lang.now = Date.now || function(){
         
@@ -325,6 +332,7 @@
         }
         
         if ( !module || module.once ){
+            _isDebug && id !== '' && _log( _lang.now() + ': the module "' + id + '" already registered. ', 'warn' );
             return null;
         }
         
@@ -433,23 +441,18 @@
             if ( _isDebug ){
                 var now = _lang.now();
                 if ( '' === module.id ){
-                    _log( now + ': the module anonymous_' + module._idx + ' failed to register. ' + status + ' execute.', 'warn' );
+                    _log( now + ': the module anonymous_' + module._idx + ' failed to register. The message: "' + e.message + '".', 'warn' );
                     return;
                 }
                 
                 'register' === type ?
-                    _log( now + ': the module "' + module.id + '" failed to register.', 'warn' ) :
-                    _log( now + ': the module "' + module.id + '" failed to require.', 'warn' );
+                    _log( now + ': the module "' + module.id + '" failed to register. The message: "' + e.message + '".', 'warn' ) :
+                    _log( now + ': the module "' + module.id + '" failed to require. The message: "' + e.message + '".', 'warn' );
             }
             
         }
         
     };
-    
-    
-    _._hexjs = global.hexjs;
-    _._define = global.define;
-    _._register = global.register;
     
     
     /**
@@ -483,7 +486,7 @@
     _hexjs.define = define;
     _hexjs.register = register;
     _hexjs.noConflict = noConflict;
-    _hexjs.version = '0.3';
+    _hexjs.version = '0.3.1';
     
     global.hexjs = _hexjs;
     

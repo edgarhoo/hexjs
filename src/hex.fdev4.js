@@ -1,8 +1,8 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.3
- * @build   111117
+ * @version v0.3.1
+ * @build   120309
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * 
@@ -11,12 +11,19 @@
 
 (function( $, global ){
     
-    var _hexjs = {},
+    var _ = {},
+        
+        _hexjs = {},
         _modules = {},
         _anonymousModules = [],
         _isDebug = global.location.search.indexOf('hexjs.debug=true') > -1;
-    
-    
+        
+
+    _._hexjs = global.hexjs;
+    _._define = global.define;
+    _._register = global.register;
+
+
     /**
      * output message
      * @param {string} message
@@ -128,6 +135,7 @@
         }
         
         if ( !module || module.once ){
+            _isDebug && id !== '' && _log( $.now() + ': the module "' + id + '" already registered. ', 'warn' );
             return null;
         }
         
@@ -236,13 +244,13 @@
             if ( _isDebug ){
                 var now = $.now();
                 if ( '' === module.id ){
-                    _log( now + ': the module anonymous_' + module._idx + ' failed to register. ' + status + ' execute.', 'warn' );
+                    _log( now + ': the module anonymous_' + module._idx + ' failed to register. The message: "' + e.message + '".', 'warn' );
                     return;
                 }
                 
                 'register' === type ?
-                    _log( now + ': the module "' + module.id + '" failed to register.', 'warn' ) :
-                    _log( now + ': the module "' + module.id + '" failed to require.', 'warn' );
+                    _log( now + ': the module "' + module.id + '" failed to register. The message: "' + e.message + '".', 'warn' ) :
+                    _log( now + ': the module "' + module.id + '" failed to require. The message: "' + e.message + '".', 'warn' );
             }
             
         }
@@ -250,9 +258,38 @@
     };
     
     
+    /**
+     * no conflict
+     * @param {boolean} is no conflict
+     * */
+    var noConflict = function( deep ){
+        
+        switch( deep ){
+            case true:
+                global.define = _._define;
+                global.register = _._register;
+                break;
+            case false:
+                global.define = define;
+                global.register = register;
+                break;
+            case undefined:
+            default:
+                if ( global.hexjs === _hexjs ){
+                    global.hexjs = _._hexjs;
+                }
+                break;
+        }
+        
+        return _hexjs;
+        
+    };
+    
+    
     _hexjs.define = define;
     _hexjs.register = register;
-    _hexjs.version = '0.3';
+    _hexjs.noConflict = noConflict;
+    _hexjs.version = '0.3.1';
     
     global.hexjs = _hexjs;
     
