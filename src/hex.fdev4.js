@@ -1,8 +1,8 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.3.1
- * @build   120309
+ * @version v0.3.1.1
+ * @build   120312
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * 
@@ -31,7 +31,7 @@
      * */
     var _log = function( message, type ){
         
-        if ( !!global.console ){
+        if ( !!global.console && !!global.console.warn ){
             _log = function( message, type ){
                 global.console[type]( message );
             };
@@ -289,7 +289,7 @@
     _hexjs.define = define;
     _hexjs.register = register;
     _hexjs.noConflict = noConflict;
-    _hexjs.version = '0.3.1';
+    _hexjs.version = '0.3.1.1';
     
     global.hexjs = _hexjs;
     
