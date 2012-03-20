@@ -491,7 +491,7 @@
     _hexjs.define = define;
     _hexjs.register = register;
     _hexjs.noConflict = noConflict;
-    _hexjs.version = '0.3.1';
+    _hexjs.version = '0.3.2';
     
     global.hexjs = _hexjs;
     
