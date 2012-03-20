@@ -1,8 +1,8 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.3.1.1
- * @build   120312
+ * @version v0.3.2
+ * @build   120320
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * 
@@ -134,7 +134,12 @@
             module = _modules[id];
         }
         
-        if ( !module || module.once ){
+        if ( !module ){
+            _isDebug && id !== '' && _log( $.now() + ': the module "' + id + '" does not exist. ', 'warn' );
+            return null;
+        }
+        
+        if ( module.once ){
             _isDebug && id !== '' && _log( $.now() + ': the module "' + id + '" already registered. ', 'warn' );
             return null;
         }

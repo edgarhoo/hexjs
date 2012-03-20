@@ -12,6 +12,7 @@ HexJS: a page-level module manager
  * Unit Testing: http://hexjs.edgarhoo.org/test/unit.testing.html
 
 ## Change Log
+ * 03.20.2012 v0.3.2 修复log机制，区分module不存在与register失败
  * 03.12.2012 v0.3.1.1 HexJS(fdev4)配合fdev4调整对console存在与否的判断
  * 03.09.2012 v0.3.1 调整log机制，register失败时输出message
  * 11.17.2011 v0.3 改require只读，改require某module时其exports为只读，define不含init函数的对象直接返回
