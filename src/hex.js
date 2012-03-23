@@ -1,51 +1,41 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.3.2
- * @build   120320
+ * @version v0.4
+ * @build   120323
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * */
 
 (function( global, doc ){
     
-    var _ = {},
-        _lang = {},
-        _util = {},
-        
-        _hexjs = {},
-        _modules = {},
-        _anonymousModules = [],
-        _isDebug = global.location.search.indexOf('hexjs.debug=true') > -1,
+    var hexjs = {},
+        modules = {},
+        anonymousModules = [],
+        isDebug = global.location.search.indexOf('hexjs.debug=true') > -1,
     
-    _toString = {}.toString;
+    toString = {}.toString,
     
-    
-    _._hexjs = global.hexjs;
-    _._define = global.define;
-    _._register = global.register;
-
-    
-    _lang.now = Date.now || function(){
+    now = Date.now || function(){
         
         return new Date().getTime();
         
-    };
+    },
     
-    _lang.isFunction = function( obj ){
+    isFunction = function( obj ){
         
-        return _toString.call( obj ) === '[object Function]';
+        return toString.call( obj ) === '[object Function]';
         //return !!( obj && obj.constructor && obj.call && obj.apply );
         
-    };
+    },
     
-    _lang.isArray = Array.isArray || function( obj ){
+    isArray = Array.isArray || function( obj ){
         
-        return _toString.call( obj ) === '[object Array]';
+        return toString.call( obj ) === '[object Array]';
         
-    };
+    },
     
-    _lang.forEach = Array.prototype.forEach ?
+    forEach = Array.prototype.forEach ?
         function( arr, fn ){
             
             arr.forEach( fn );
@@ -57,22 +47,7 @@
                 fn( arr[i] );
             }
             
-        };
-    
-    _util.extend = function( target, o ){
-        
-        if ( o === undefined ){
-            return;
-        }
-        
-        for ( var name in o ){
-            if ( o[name] !== undefined ){
-                target[name] = o[name];
-            }
-        }
-        //return target;
-        
-    };
+        },
     
     
     /**
@@ -84,111 +59,112 @@
      * https://github.com/blank/domready/blob/master/domready.js
      * https://github.com/jrburke/requirejs/blob/master/domReady.js
      * */
-    _.isReady = 0;
+    _isReady = 0,
     
-    _.isBind = 0;
+    _isBind = 0,
     
-    _.readyList = [];
+    _readyList = [],
     
-    _.testEl = doc.documentElement;
+    _testEl = doc.documentElement,
     
-    _.readyInit = function(){
+    _readyInit = function(){
         
-        _.isReady = 1;
+        _isReady = 1;
 
         if ( !doc.body ){
             setTimeout( arguments.callee, 10 );
             return;
         }
         
-        for ( var i = 0, l = _.readyList.length; i < l; i++ ){
-            _.readyList[i]();
+        for ( var i = 0, l = _readyList.length; i < l; i++ ){
+            _readyList[i]();
         }
         
-        _.readyList = [];
-    };
+        _readyList = [];
+    },
     
-    _.bindReady = function(){
+    _bindReady = function(){
         
         if ( 'complete' === doc.readyState ){
-            _.readyInit();
+            _readyInit();
         } else if ( doc.addEventListener ){
             doc.addEventListener( 'DOMContentLoaded', function(){
                 doc.removeEventListener( 'DOMContentLoaded', arguments.callee, false );
-                _.readyInit();
+                _readyInit();
             }, false );
             
-            global.addEventListener( 'load', _.readyInit, false );
+            global.addEventListener( 'load', _readyInit, false );
         } else if( doc.attachEvent ){
             // In IE, ensure firing before onload, maybe late but safe also for iframes.
             doc.attachEvent( 'onreadystatechange', function(){
                 if ( 'complete' === doc.readyState ) {
                     doc.detachEvent( 'onreadystatechange', arguments.callee );
-                    _.readyInit();
+                    _readyInit();
                 }
             });
             
-            global.attachEvent( 'onload', _.readyInit );
+            global.attachEvent( 'onload', _readyInit );
 
             // If IE and not a frame, continually check to see if the doc is ready.
-			if ( _.testEl.doScroll && global == global.top ) {
-				_.doScrollCheck();
+			if ( _testEl.doScroll && global == global.top ) {
+				_doScrollCheck();
 			}
         }
-    };
+    },
     
-    _.doScrollCheck = function(){
+    _doScrollCheck = function(){
         
-        if ( _.isReady ){
+        if ( _isReady ){
             return;
         }
         
         try {
             // If IE is used, use the trick by Diego Perini
             // http://javascript.nwbox.com/IEContentLoaded/
-            _.testEl.doScroll( 'left' );
+            _testEl.doScroll( 'left' );
         } catch(e) {
-            setTimeout( _.doScrollCheck, 1 );
+            setTimeout( _doScrollCheck, 1 );
             return;
         }
         
-        _.readyInit();
+        _readyInit();
         
-    };
+    },
     
-    _util.ready = function( fn ){
+    ready = function( fn ){
         
-        _.readyList.push( fn );
+        _readyList.push( fn );
         
-        if ( _.isReady ){
+        if ( _isReady ){
             fn();
-        } else if ( !_.isBind ){
-            _.isBind = 1;
-            _.bindReady();
+        } else if ( !_isBind ){
+            _isBind = 1;
+            _bindReady();
         }
         
-    };
+    },
+    
     
     /**
      * Ref:
      * http://jquery.glyphix.com/jquery.debug/jquery.debug.js
      * */
-    _.messageList = [];
+    _messageList = [],
     
-    _.messageBox = null;
+    _messageBox = null,
     
-    _.prepared = false;
+    _prepared = false,
     
-    _.createMessage = function( item ){
+    _createMessage = function( item ){
         var li = doc.createElement('li');
         'warn' === item.type ? li.style.color = 'red' : li.style.color = '#000';
         li.innerHTML = item.message;
-        _.messageBox.appendChild( li );
-    };
+        _messageBox.appendChild( li );
+    },
     
-    _.messagePrepare = function(){
+    _messagePrepare = function(){
         
-        _util.ready(function(){
+        ready(function(){
             var box = doc.createElement('div');
             box.id = 'hexjs-debug';
             box.style.margin = '10px 0';
@@ -198,51 +174,47 @@
             box.style.lineHeight = '1.5';
             box.style.textAlign = 'left';
             doc.body.appendChild( box );
-            _.messageBox = doc.createElement('ol');
-            _.messageBox.style.listStyleType = 'decimal';
-            box.appendChild( _.messageBox );
-            _lang.forEach( _.messageList, function( item ){
-                _.createMessage( item );
+            _messageBox = doc.createElement('ol');
+            _messageBox.style.listStyleType = 'decimal';
+            box.appendChild( _messageBox );
+            forEach( _messageList, function( item ){
+                _createMessage( item );
             } );
         });
         
-        _.prepared = true;
-    };
+        _prepared = true;
+    },
     
-    _util.console = function( message, type ){
+    _console = function( message, type ){
         
         var item = {
             'message': message,
             'type': type
         };
         
-        !_.prepared && _.messagePrepare();
-        _.messageBox ?
-            _.createMessage( item ) :
-            _.messageList.push( item );
+        !_prepared && _messagePrepare();
+        _messageBox ?
+            _createMessage( item ) :
+            _messageList.push( item );
         
     };
+    
     
     /**
      * output message
      * @param {string} message
      * @param {string} message type
      * */
-    var _log = function( message, type ){
-        
-        if ( !!global.console && global.console.info ){
-            _log = function( message, type ){
-                global.console[type]( message );
-            };
-        } else {
-            _log = function( message, type ){
-                _util.console( message, type );
-            };
-        }
-        
-        _log( message, type );
-        
-    };
+    var log = isDebug ? ( 
+                !!global.console && global.console.warn ? 
+                function( message, type ){
+                    type = type || 'info';
+                    global.console[type]( message );
+                } :
+                function( message, type ){
+                    tpye = type || 'info';
+                    _console( message, type );
+                } ) : function(){};
     
     
     /**
@@ -250,12 +222,11 @@
      * @param {string} module id
      * @param {object} module factory
      * */
-    var _Module = function( id, factory ){
+    var Module = function( id, factory ){
         
         this.id = id;
         this.factory = factory;
         this.exports = {};
-        this.clone = function(){};
         this.once = false;
         
     };
@@ -277,24 +248,24 @@
         }
         
         // if id already exists, return
-        if ( _modules[id] ){
-            _isDebug && _log( _lang.now() + ': the module "' + id + '" already exists. ', 'warn' );
+        if ( modules[id] ){
+            log( now() + ': the module "' + id + '" already exists. ', 'warn' );
             return null;
         }
         
-        if ( _lang.isFunction( factory ) ){
+        if ( isFunction( factory ) ){
             factory = { init: factory };
         }
         
-        module = new _Module( id, factory );
+        module = new Module( id, factory );
         
         if ( id !== '' ){
-            _modules[id] = module;
+            modules[id] = module;
         } else {
-            anonymousLength = _anonymousModules.length;
+            anonymousLength = anonymousModules.length;
             module._idx = anonymousLength;
-            _anonymousModules[anonymousLength] = module;
-            return new _Fn( anonymousLength );
+            anonymousModules[anonymousLength] = module;
+            return new Anonymous( anonymousLength );
         }
         
     };
@@ -311,8 +282,8 @@
             ids,
             isAfterReady;
         
-        if ( _lang.isArray( id ) ){
-            _lang.forEach( id, function( item ){
+        if ( isArray( id ) ){
+            forEach( id, function( item ){
                 args.callee( item );
             } );
             return;
@@ -327,27 +298,27 @@
             id = ids[1];
         }
         
-        if ( !module || !( module instanceof _Module ) ){
-            module = _modules[id];
+        if ( !module || !( module instanceof Module ) ){
+            module = modules[id];
         }
         
         if ( !module ){
-            _isDebug && id !== '' && _log( _lang.now() + ': the module "' + id + '" does not exist. ', 'warn' );
+            id !== '' && log( now() + ': the module "' + id + '" does not exist. ', 'warn' );
             return null;
         }
         
         if ( module.once ){
-            _isDebug && id !== '' && _log( _lang.now() + ': the module "' + id + '" already registered. ', 'warn' );
+            id !== '' && log( now() + ': the module "' + id + '" already registered. ', 'warn' );
             return null;
         }
         
         module.once = true;
         
         isAfterReady ?
-            _util.ready(function(){
-                _execute( module, 'register', 'after ready' );
+            ready(function(){
+                execute( module, 'register', 'after ready' );
             }) :
-            _execute( module, 'register', 'now' );
+            execute( module, 'register', 'now' );
         
     };
     
@@ -358,22 +329,23 @@
         
     };
     
+    
     /**
-     * fn constructor
+     * Anonymous constructor
      * @param {int} anonymous module idx
      * */
-    var _Fn = function( idx ){
+    var Anonymous = function( idx ){
         
         this.idx = idx;
         
     };
     
     
-    _Fn.prototype.register = function( isAfterReady ){
+    Anonymous.prototype.register = function( isAfterReady ){
         
         var id = isAfterReady === '~' ? '~' : '';
         
-        _register.call( null, id, _anonymousModules[this.idx] );
+        _register.call( null, id, anonymousModules[this.idx] );
         
     };
     
@@ -385,7 +357,7 @@
      * */
     var __require = function( id, refresh ){
         
-        var module = _modules[id];
+        var module = modules[id];
         
         if ( !module ){
             return;
@@ -393,14 +365,15 @@
         
         if ( !module.once || refresh ){
             module.once = true;
-            _execute( module, 'require' );
+            execute( module, 'require' );
         }
+
+        return module.exports;
         
-        return new module.clone();
     };
     
     
-    var _Require = function(){
+    var Require = function(){
         
         function _require( id, refresh ){
             return __require.call( null, id, refresh );
@@ -417,47 +390,52 @@
      * @param {string} execute type
      * @param {string} execute status
      * */
-    var _execute = function( module, type, status ){
+    var execute = function( module, type, status ){
         
         try {
-            if ( _lang.isFunction( module.factory.init ) ){
-                var exports = module.factory.init( _Require(), module.exports, module );
-                _util.extend( module.exports, exports );
+            if ( isFunction( module.factory.init ) ){
+                var exports = module.factory.init( Require(), module.exports, module );
+                if ( exports !== undefined ){
+                    module.exports = exports;
+                }
             } else if ( module.factory !== undefined ) {
                 module.exports = module.factory;
             }
             
-            module.clone.prototype = module.exports;
-            
-            if ( _isDebug ){
-                var now = _lang.now();
+            if ( isDebug ){
+                var _now = now();
                 if ( '' === module.id ){
-                    _log( now + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execute.', 'info' );
+                    log( _now + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execute.' );
                     return;
                 }
                 
                 'register' === type ?
-                    _log( now + ': the module "' + module.id + '" registered. ' + status + ' execute.', 'info' ) :
-                    _log( now + ': the module "' + module.id + '" required.', 'info' );
+                    log( _now + ': the module "' + module.id + '" registered. ' + status + ' execute.' ) :
+                    log( _now + ': the module "' + module.id + '" required.' );
             }
             
         } catch(e) {
             
-            if ( _isDebug ){
-                var now = _lang.now();
+            if ( isDebug ){
+                var _now = now();
                 if ( '' === module.id ){
-                    _log( now + ': the module anonymous_' + module._idx + ' failed to register. The message: "' + e.message + '".', 'warn' );
+                    log( _now + ': the module anonymous_' + module._idx + ' failed to register. The message: "' + e.message + '".', 'warn' );
                     return;
                 }
                 
                 'register' === type ?
-                    _log( now + ': the module "' + module.id + '" failed to register. The message: "' + e.message + '".', 'warn' ) :
-                    _log( now + ': the module "' + module.id + '" failed to require. The message: "' + e.message + '".', 'warn' );
+                    log( _now + ': the module "' + module.id + '" failed to register. The message: "' + e.message + '".', 'warn' ) :
+                    log( _now + ': the module "' + module.id + '" failed to require. The message: "' + e.message + '".', 'warn' );
             }
             
         }
         
     };
+    
+    
+    var __hexjs = global.hexjs,
+        __define = global.define,
+        __register = global.register;
     
     
     /**
@@ -468,8 +446,8 @@
         
         switch( deep ){
             case true:
-                global.define = _._define;
-                global.register = _._register;
+                global.define = __define;
+                global.register = __register;
                 break;
             case false:
                 global.define = define;
@@ -477,22 +455,22 @@
                 break;
             case undefined:
             default:
-                if ( global.hexjs === _hexjs ){
-                    global.hexjs = _._hexjs;
+                if ( global.hexjs === hexjs ){
+                    global.hexjs = __hexjs;
                 }
-                break;
         }
         
-        return _hexjs;
+        return hexjs;
         
     };
     
     
-    _hexjs.define = define;
-    _hexjs.register = register;
-    _hexjs.noConflict = noConflict;
-    _hexjs.version = '0.3.2';
+    hexjs.define = define;
+    hexjs.register = register;
+    hexjs.log = log;
+    hexjs.noConflict = noConflict;
+    hexjs.version = '0.4';
     
-    global.hexjs = _hexjs;
+    global.hexjs = hexjs;
     
 })( this, document );

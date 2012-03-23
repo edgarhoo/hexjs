@@ -4,7 +4,7 @@
         <meta charset="utf-8"/>
         <title>HexJS Manual</title>
         <meta name="author" content="Edgar Hoo, edgarhoo.net"/>
-        <meta name="date" content="Oct 31, 2011"/>
+        <meta name="date" content="Mar 23, 2012"/>
         <link rel="stylesheet" href="http://static.edgarhoo.net/sys/highlight/sh.css"/>
     </head>
     <body>
@@ -20,13 +20,13 @@
             <h1>define</h1>
             <pre class="sh_js">
     // define a module with function
-    hexjs.define( 'module-name', function( require, exports, module ){
+    hexjs.define( 'module-id', function( require, exports, module ){
         //todo something
     } );
             </pre>
             <pre class="sh_js">
-    // define a module with object,  but it must contain a function called 'init'
-    hexjs.define( 'module-name', {
+    // define a module with object, this object contains the initialization function named 'init', require that the module is the first implementation of the 'init' function and returns its results, if there is no 'init' function, it returns the object
+    hexjs.define( 'module-id', {
         init: function( require, exports, module ){
             //todo something
         },
@@ -44,12 +44,12 @@
             <h1>register</h1>
             <pre class="sh_js">
     // register a module, and it will be executed after ready
-    hexjs.register('module-name');
+    hexjs.register('module-id');
             </pre>
             <pre class="sh_js">
     // register a module, and it will be executed now
     // add a tilde(~) before the module name
-    hexjs.register('~module-name');
+    hexjs.register('~module-id');
             </pre>
             <pre class="sh_js">
     // register an anonymous module, and it will be executed after ready
@@ -63,6 +63,10 @@
         //todo something
     } ).register('~');
             </pre>
+            <pre class="sh_js">
+    // register many modules
+    hexjs.register( ['module-a', 'module-b', '~module-c'] );
+            </pre>
         </article>
         <article>
             <h1>exports</h1>
@@ -73,7 +77,7 @@
     } );
             </pre>
             <pre class="sh_js">
-    // output API from return
+    // output API from return, output object, function, array
     hexjs.define( 'module-b', function( require, exports, module ){
         return {
             b: 'bbb'
@@ -81,17 +85,19 @@
     } );
             </pre>
             <pre class="sh_js">
-    // output from return will cover form exports
+    // if 'return' exists, 'exports' will failure
     hexjs.define( 'module-c', function( require, exports, module ){
         exports.c = '111';
+        exports.d = '222';
         return {
             c: 'ccc'
         }
+        // c --> 'ccc', d --> undefined
     } );
             </pre>
             <pre class="sh_js wrong">
-    // not covered the exports
-    hexjs.define( 'module-c', function( require, exports, module ){
+    // not covered the exports, need to output an instance, use 'return' or assign to 'module.exports'
+    hexjs.define( 'module-d', function( require, exports, module ){
         exports = {
             a: '111'
         };
@@ -102,14 +108,14 @@
             <h1>require</h1>
             <pre class="sh_js">
     // require module-a
-    hexjs.define( 'module-name', function( require, exports, module ){
+    hexjs.define( 'module-e', function( require, exports, module ){
         var a = require('module-a');
         // a.a --> '1314289663337'
     } );
             </pre>
             <pre class="sh_js">
     // set the re-run option is 'true', the module will executed again, and covering the original results
-    hexjs.define( 'module-name', function( require, exports, module ){
+    hexjs.define( 'module-f', function( require, exports, module ){
         var a = require('module-a', true);
         // a.a --> '1314289701153'
     } );
@@ -120,14 +126,14 @@
             <h2>module.id</h2>
             <pre class="sh_js">
     // module.id returns the current module name
-    hexjs.define( 'module-d', function( require, exports, module ){
-        console.info( module.id ); // --> module-d
+    hexjs.define( 'module-g', function( require, exports, module ){
+        console.info( module.id ); // --> module-g
     } );
             </pre>
             <h2>module.exports</h2>
             <pre class="sh_js">
     // output API from module.exports
-    hexjs.define( 'module-e', function( require, exports, module ){
+    hexjs.define( 'module-h', function( require, exports, module ){
         module.exports = {
             a: 'aaa'
         };
@@ -170,6 +176,13 @@
             <pre class="sh_js">
     // free up 'define' and 'register'
     hexjs.noConflict(true);
+            </pre>
+        </article>
+        <article>
+            <h1>hexjs.log</h1>
+            <pre class="sh_js">
+    // output debug message，type: 'info' or 'warn', default is 'info'
+    hexjs.log( message, type );
             </pre>
         </article>
         <article>

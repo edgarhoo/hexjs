@@ -1,8 +1,8 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.3.2
- * @build   120320
+ * @version v0.4
+ * @build   120323
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * 
@@ -11,17 +11,14 @@
 
 (function( $, global ){
     
-    var _ = {},
+    var hexjs = {},
+        modules = {},
+        anonymousModules = [],
+        isDebug = global.location.search.indexOf('hexjs.debug=true') > -1,
         
-        _hexjs = {},
-        _modules = {},
-        _anonymousModules = [],
-        _isDebug = global.location.search.indexOf('hexjs.debug=true') > -1;
-        
-
-    _._hexjs = global.hexjs;
-    _._define = global.define;
-    _._register = global.register;
+    isFunction = $.isFunction,
+    isArray = $.isArray,
+    each = $.each;
 
 
     /**
@@ -29,23 +26,17 @@
      * @param {string} message
      * @param {string} message type
      * */
-    var _log = function( message, type ){
-        
-        if ( !!global.console && !!global.console.warn ){
-            _log = function( message, type ){
-                global.console[type]( message );
-            };
-        } else {
-            _log = function( message, type ){
-                $.use( 'util-debug', function(){
-                    $.log( message );
-                } );
-            };
-        }
-        
-        _log( message, type );
-        
-    };
+    var log = isDebug ? ( 
+                !!global.console && global.console.warn ? 
+                function( message, type ){
+                    type = type || 'info';
+                    global.console[type]( message );
+                } :
+                function( message, type ){
+                    $.use( 'util-debug', function(){
+                        $.log( message );
+                    } );
+                } ) : function(){};
     
     
     /**
@@ -53,12 +44,11 @@
      * @param {string} module id
      * @param {object} module factory
      * */
-    var _Module = function( id, factory ){
+    var Module = function( id, factory ){
         
         this.id = id;
         this.factory = factory;
         this.exports = {};
-        this.clone = function(){};
         this.once = false;
         
     };
@@ -80,24 +70,24 @@
         }
         
         // if id already exists, return
-        if ( _modules[id] ){
-            _isDebug && _log( $.now() + ': the module "' + id + '" already exists. ', 'warn' );
+        if ( modules[id] ){
+            log( $.now() + ': the module "' + id + '" already exists. ', 'warn' );
             return null;
         }
         
-        if ( $.isFunction( factory ) ){
+        if ( isFunction( factory ) ){
             factory = { init: factory };
         }
         
-        module = new _Module( id, factory );
+        module = new Module( id, factory );
         
         if ( id !== '' ){
-            _modules[id] = module;
+            modules[id] = module;
         } else {
-            anonymousLength = _anonymousModules.length;
+            anonymousLength = anonymousModules.length;
             module._idx = anonymousLength;
-            _anonymousModules[anonymousLength] = module;
-            return new _Fn( anonymousLength );
+            anonymousModules[anonymousLength] = module;
+            return new Anonymous( anonymousLength );
         }
         
     };
@@ -114,8 +104,8 @@
             ids,
             isReady;
         
-        if ( $.isArray( id ) ){
-            $.each( id, function( i, item ){
+        if ( isArray( id ) ){
+            each( id, function( i, item ){
                 args.callee( item );
             } );
             return;
@@ -130,17 +120,17 @@
             id = ids[1];
         }
         
-        if ( !module || !(module instanceof _Module) ){
-            module = _modules[id];
+        if ( !module || !(module instanceof Module) ){
+            module = modules[id];
         }
         
         if ( !module ){
-            _isDebug && id !== '' && _log( $.now() + ': the module "' + id + '" does not exist. ', 'warn' );
+            id !== '' && log( $.now() + ': the module "' + id + '" does not exist. ', 'warn' );
             return null;
         }
         
         if ( module.once ){
-            _isDebug && id !== '' && _log( $.now() + ': the module "' + id + '" already registered. ', 'warn' );
+            id !== '' && log( $.now() + ': the module "' + id + '" already registered. ', 'warn' );
             return null;
         }
         
@@ -148,9 +138,9 @@
         
         isReady ?
             $(function(){
-                _execute( module, 'register', 'after ready' );
+                execute( module, 'register', 'after ready' );
             }) :
-            _execute( module, 'register', 'now' );
+            execute( module, 'register', 'now' );
         
     };
     
@@ -165,18 +155,18 @@
      * fn constructor
      * @param {int} anonymous module idx
      * */
-    var _Fn = function( idx ){
+    var Anonymous = function( idx ){
         
         this.idx = idx;
         
     };
     
     
-    _Fn.prototype.register = function( isReady ){
+    Anonymous.prototype.register = function( isReady ){
         
         var id = isReady === '~' ? '~' : '';
         
-        _register.call( null, id, _anonymousModules[this.idx] );
+        _register.call( null, id, anonymousModules[this.idx] );
         
     };
     
@@ -188,7 +178,7 @@
      * */
     var __require = function( id, refresh ){
         
-        var module = _modules[id];
+        var module = modules[id];
         
         if ( !module ){
             return;
@@ -196,14 +186,14 @@
 
         if ( !module.once || refresh ){
             module.once = true;
-            _execute( module, 'require' );
+            execute( module, 'require' );
         }
         
-        return new module.clone();
+        return module.exports;
     };
     
     
-    var _Require = function(){
+    var Require = function(){
         
         function _require( id, refresh ){
             return __require.call( null, id, refresh );
@@ -220,47 +210,52 @@
      * @param {string} execute type
      * @param {string} execute status
      * */
-    var _execute = function( module, type, status ){
+    var execute = function( module, type, status ){
         
         try {
-            if ( $.isFunction( module.factory.init ) ){
-                var exports = module.factory.init( _Require(), module.exports, module );
-                exports === undefined || $.extend( module.exports, exports );
+            if ( isFunction( module.factory.init ) ){
+                var exports = module.factory.init( Require(), module.exports, module );
+                if ( exports !== undefined ){
+                    module.exports = exports;
+                }
             } else if ( module.factory !== undefined ) {
                 module.exports = module.factory;
             }
             
-            module.clone.prototype = module.exports;
-            
-            if ( _isDebug ){
+            if ( isDebug ){
                 var now = $.now();
                 if ( '' === module.id ){
-                    _log( now + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execute.', 'info' );
+                    log( now + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execute.' );
                     return;
                 }
                 
                 'register' === type ?
-                    _log( now + ': the module "' + module.id + '" registered. ' + status + ' execute.', 'info' ) :
-                    _log( now + ': the module "' + module.id + '" required.', 'info' );
+                    log( now + ': the module "' + module.id + '" registered. ' + status + ' execute.' ) :
+                    log( now + ': the module "' + module.id + '" required.' );
             }
             
         } catch(e) {
             
-            if ( _isDebug ){
+            if ( isDebug ){
                 var now = $.now();
                 if ( '' === module.id ){
-                    _log( now + ': the module anonymous_' + module._idx + ' failed to register. The message: "' + e.message + '".', 'warn' );
+                    log( now + ': the module anonymous_' + module._idx + ' failed to register. The message: "' + e.message + '".', 'warn' );
                     return;
                 }
                 
                 'register' === type ?
-                    _log( now + ': the module "' + module.id + '" failed to register. The message: "' + e.message + '".', 'warn' ) :
-                    _log( now + ': the module "' + module.id + '" failed to require. The message: "' + e.message + '".', 'warn' );
+                    log( now + ': the module "' + module.id + '" failed to register. The message: "' + e.message + '".', 'warn' ) :
+                    log( now + ': the module "' + module.id + '" failed to require. The message: "' + e.message + '".', 'warn' );
             }
             
         }
         
     };
+    
+    
+    __hexjs = global.hexjs;
+    __define = global.define;
+    __register = global.register;
     
     
     /**
@@ -271,8 +266,8 @@
         
         switch( deep ){
             case true:
-                global.define = _._define;
-                global.register = _._register;
+                global.define = __define;
+                global.register = __register;
                 break;
             case false:
                 global.define = define;
@@ -280,22 +275,23 @@
                 break;
             case undefined:
             default:
-                if ( global.hexjs === _hexjs ){
-                    global.hexjs = _._hexjs;
+                if ( global.hexjs === hexjs ){
+                    global.hexjs = __hexjs;
                 }
                 break;
         }
         
-        return _hexjs;
+        return hexjs;
         
     };
     
     
-    _hexjs.define = define;
-    _hexjs.register = register;
-    _hexjs.noConflict = noConflict;
-    _hexjs.version = '0.3.2';
+    hexjs.define = define;
+    hexjs.register = register;
+    hexjs.log = log;
+    hexjs.noConflict = noConflict;
+    hexjs.version = '0.4';
     
-    global.hexjs = _hexjs;
+    global.hexjs = hexjs;
     
 })( jQuery, this );

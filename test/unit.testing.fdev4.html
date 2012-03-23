@@ -6,6 +6,9 @@
         <script src="http://static.c.aliimg.com/js/lib/fdev-v4/core/fdev-min.js"></script>
         <script src="../src/hex.fdev4.js"></script>
         <script>
+            hexjs.log('hexjs log');
+            hexjs.log('hexjs warn', 'warn');
+            
             /**
              * @module ut
              * */
@@ -118,13 +121,13 @@
             /**
              * @module require-value-readonly
              * */
-            hexjs.define( 'require-value-readonly-pre', function( require, exports ){
-                exports.variable = 0;
-            } );
-            hexjs.define( 'require-value-readonly', function( require, exports ){
-                require('require-value-readonly-pre').variable = 1;
-                exports.variable = require('require-value-readonly-pre').variable;
-            } );
+            //hexjs.define( 'require-value-readonly-pre', function( require, exports ){
+            //    exports.variable = 0;
+            //} );
+            //hexjs.define( 'require-value-readonly', function( require, exports ){
+            //    require('require-value-readonly-pre').variable = 1;
+            //    exports.variable = require('require-value-readonly-pre').variable;
+            //} );
 
             /**
              * @module exports
@@ -132,8 +135,18 @@
             hexjs.define( 'exports', function( require, exports ){
                 exports.variable = 'exports';
             } );
+            
+            
+            /**
+             * @module exports-not-cover
+             * */
+            hexjs.define( 'exports-not-cover', function( require, exports ){
+                exports = {
+                    variable: 'variable'
+                };
+            } );
 
-
+            
             /**
              * @module exports-return
              * */
@@ -141,6 +154,24 @@
                 return {
                     variable: 'exports-return'
                 }
+            } );
+
+            
+            /**
+             * @module exports-return-function
+             * */
+            hexjs.define( 'exports-return-function', function(){
+                return function(){
+                    return 'exports-return-function';
+                }
+            } );
+
+            
+            /**
+             * @module exports-return-array
+             * */
+            hexjs.define( 'exports-return-array', function(){
+                return ['exports-return-array'];
             } );
 
 
@@ -157,6 +188,7 @@
              * */
             hexjs.define( 'exports-return-cover', function( require, exports ){
                 exports.variable = 'exports';
+                exports.value = 'value';
                 return {
                     variable: 'exports-return-cover'
                 }
@@ -171,6 +203,24 @@
                     variable: 'module-exports'
                 }
             } );
+
+
+            /**
+             * @module module-exports-function
+             * */
+            //hexjs.define( 'module-exports-function', function( require, exports, module ){
+            //    module.exports = function(){
+            //        return 'module-exports-function';
+            //    };
+            //} );
+
+
+            /**
+             * @module module-exports-array
+             * */
+            //hexjs.define( 'module-exports-array', function( require, exports, module ){
+            //    module.exports = [ 'module-exports-array' ];
+            //} );
 
 
             /**
@@ -214,81 +264,113 @@
             
             hexjs.register('~register-now');
             
-            hexjs.define(function(require){
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register register-now';
                 require('ut').print( require('register-now').isEmpty, 'register-now' );
             }).register();
             
             hexjs.register( ['register-multi-a','~register-multi-b'] );
             
-            hexjs.define(function(require){
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register define-repeat';
                 require('ut').print( require('define-repeat').variable === 'repeat', 'define-not-repeat' );
             }).register();
             
-            hexjs.define(function(require){
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register define-object-init';
                 require('ut').print( require('define-object-init').variable === 'define-object-init', 'define-object-init' );
             } ).register();
             
-            hexjs.define(function(require){
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register require';
                 require('require').print( true, 'require');
             } ).register();
             
-            hexjs.define(function(require){
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register require-refresh';
                 require('ut').print( require('require-refresh').variable !== require('require-refresh',true).variable, 'require-refresh' );
             }).register();
             
-            hexjs.define(function(require){
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register require-readonly';
                 require('require-readonly');
                 require('ut').print( require.variable !== 'require-readonly', 'require-readonly' );
             }).register();
             
-            hexjs.define(function(require){
-                require('ut').print( require('require-value-readonly-pre').variable === require('require-value-readonly').variable, 'require-value-readonly' );
-            }).register();
+            //hexjs.define(function(require){
+            //    require('ut').print( require('require-value-readonly-pre').variable === require('require-value-readonly').variable, 'require-value-readonly' );
+            //}).register();
             
-            hexjs.define(function(require){
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register exports';
                 require('ut').print( require('exports').variable === 'exports', 'exports' );
             } ).register();
             
-            hexjs.define(function(require){
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register exports-not-cover';
+                require('ut').print( require('exports-not-cover').variable !== 'variable', 'exports-not-cover' );
+            } ).register();
+            
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register exports-return';
                 require('ut').print( require('exports-return').variable === 'exports-return', 'exports-return' );
             } ).register();
             
-            hexjs.define(function(require){
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register exports-return-function';
+                require('ut').print( require('exports-return-function')() === 'exports-return-function', 'exports-return-function' );
+            } ).register();
+            
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register exports-return-array';
+                require('ut').print( jQuery.isArray( require('exports-return-array') ) && require('exports-return-array')[0] === 'exports-return-array', 'exports-return-array' );
+            } ).register();
+            
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register exports-return-simplify';
                 require('ut').print( require('exports-return-simplify').variable === 'exports-return-simplify', 'exports-return-simplify' );
             } ).register();
             
-            hexjs.define(function(require){
-                require('ut').print( require('exports-return-cover').variable === 'exports-return-cover', 'exports-return-cover' );
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register exports-return-cover';
+                require('ut').print( require('exports-return-cover').variable === 'exports-return-cover' && require('exports-return-cover').value !== 'value', 'exports-return-cover' );
             } ).register();
             
-            hexjs.define(function(require){
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register module-exports';
                 require('ut').print( require('module-exports').variable === 'module-exports', 'module-exports' );
             } ).register();
             
-            hexjs.define(function(require){
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register module-id';
                 require('ut').print( require('module-id').id === 'module-id', 'module-id' );
             } ).register();
             
             hexjs.define(function( require, exports, module ){
+                module.id = 'register module-constructor';
                 require('module-constructor');
                 require('ut').print( module.getId() === 'module-constructor', 'module-constructor' );
             } ).register();
             
-            hexjs.define(function(require){
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register register-multi';
                 require('ut').print( require('register-multi').get() === 2, 'register-multi' );
             }).register();
             
-            hexjs.define(function(require){
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register noConflict-false';
                 hexjs.register('~noConflict-false');
                 require('ut').print( define === hexjs.define && register === hexjs.register, 'noConflict-false' );
             }).register();
             
-            hexjs.define(function(require){
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register noConflict-true';
                 hexjs.register('~noConflict-true');
                 require('ut').print( define !== hexjs.define && register !== hexjs.register, 'noConflict-true' );
             }).register();
             
-            hexjs.define(function(require){
+            hexjs.define(function( require, exports, module ){
+                module.id = 'register noConflict-undefined';
                 hexjs.register('~noConflict-undefined');
                 require('ut').print( hexjs === undefined, 'noConflict-undefined' );
                 window.hexjs = hexjsTemp;
@@ -297,7 +379,7 @@
     </head>
     <body style="width:800px;margin:0 auto;">
         <h1>HexJS Unit Testing</h1>
-        <ul id="test-output">
+        <ul id="hexjs-ut-output">
             <li id="register-ready"></li>
             <li id="register-now"></li>
             <li id="define-not-repeat"></li>
@@ -305,9 +387,14 @@
             <li id="require"></li>
             <li id="require-refresh"></li>
             <li id="require-readonly"></li>
+            <!--
             <li id="require-value-readonly"></li>
+            -->
             <li id="exports"></li>
+            <li id="exports-not-cover"></li>
             <li id="exports-return"></li>
+            <li id="exports-return-function"></li>
+            <li id="exports-return-array"></li>
             <li id="exports-return-simplify"></li>
             <li id="exports-return-cover"></li>
             <li id="module-exports"></li>
