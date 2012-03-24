@@ -2,12 +2,14 @@
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
  * @version v0.4
- * @build   120323
+ * @build   120324
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * */
 
 (function( global, doc ){
+    
+    //"use strict";
     
     var hexjs = {},
         modules = {},
@@ -284,7 +286,8 @@
         
         if ( isArray( id ) ){
             forEach( id, function( item ){
-                args.callee( item );
+                _register.call( null, item );
+                //args.callee( item );
             } );
             return;
         }

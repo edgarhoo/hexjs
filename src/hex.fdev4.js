@@ -11,6 +11,8 @@
 
 (function( $, global ){
     
+    "use strict";
+    
     var hexjs = {},
         modules = {},
         anonymousModules = [],
@@ -106,7 +108,8 @@
         
         if ( isArray( id ) ){
             each( id, function( i, item ){
-                args.callee( item );
+                _register.call( null, item );
+                //args.callee( item );
             } );
             return;
         }
@@ -253,9 +256,9 @@
     };
     
     
-    __hexjs = global.hexjs;
-    __define = global.define;
-    __register = global.register;
+    var __hexjs = global.hexjs,
+        __define = global.define,
+        __register = global.register;
     
     
     /**
