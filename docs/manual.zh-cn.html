@@ -4,7 +4,7 @@
         <meta charset="utf-8"/>
         <title>HexJS使用手册</title>
         <meta name="author" content="Edgar Hoo, edgarhoo.net"/>
-        <meta name="date" content="Mar 23, 2012"/>
+        <meta name="date" content="Apr 1, 2012"/>
         <link rel="stylesheet" href="http://static.edgarhoo.net/sys/highlight/sh.css"/>
     </head>
     <body>
@@ -19,179 +19,202 @@
         <article>
             <h1>define</h1>
             <pre class="sh_js">
-    // 定义module
-    hexjs.define( 'module-id', function( require, exports, module ){
-        //todo something
-    } );
+// 定义module
+hexjs.define( id?, dependencies?, factory );
+
+hexjs.define( 'module-id', ['module-a'], function( a, require, exports, module ){
+    //todo something
+} );
+
+hexjs.define( 'module-id', ['module-a','module-b'], function( a, b, require, exports, moudle ){
+    //todo something
+} );
+
+hexjs.define( 'module-id', function( require, exports, module ){
+    //todo something
+} );
             </pre>
             <pre class="sh_js">
-    // 通过对象定义module，此对象含有名为'init'的初始化函数时，require该module则先执行'init'函数并返回其结果，若不存在'init'函数，则返回该对象
-    hexjs.define( 'module-id', {
-        init: function( require, exports, module ){
-            //todo something
-        },
-        _other: function(){}
-    } );
+// 通过对象定义module，此对象含有名为'init'的初始化函数时，require该module则先执行'init'函数并返回其结果，若不存在'init'函数，则返回该对象
+hexjs.define( 'module-id', {
+    init: function( require, exports, module ){
+        //todo something
+    },
+    _other: function(){}
+} );
+
+hexjs.define( 'module-id', ['module-a','module-b'], {
+    init: function( a, b, require, exports, module ){
+        //todo something
+    },
+    _other: function(){}
+} );
             </pre>
             <pre class="sh_js">
-    // 定义匿名module
-    hexjs.define( function( require, exports, module ){
-        //todo something
-    } );
+// 定义匿名module
+hexjs.define( function( require, exports, module ){
+    //todo something
+} );
+
+hexjs.define( ['module-a','module-b'], function( a, b, require, exports, module ){
+    //todo something
+} );
             </pre>
         </article>
         <article>
             <h1>register</h1>
             <p>注册module时，选择执行类型。多次注册同一module，只执行第一次</p>
             <pre class="sh_js">
-    // 注册module，DOM ready之后执行
-    hexjs.register('module-id');
+// 注册module，DOM ready之后执行
+hexjs.register('module-id');
             </pre>
             <pre class="sh_js">
-    // 注册时，在module id前加一个波浪号(英文~)，则此module即刻执行
-    hexjs.register('~module-id');
+// 注册时，在module id前加一个波浪号(英文~)，则此module即刻执行
+hexjs.register('~module-id');
             </pre>
             <pre class="sh_js">
-    // 注册匿名module，DOM ready之后执行
-    hexjs.define( function( require, exports, module ){
-        //todo something
-    } ).register();
+// 注册匿名module，DOM ready之后执行
+hexjs.define( function( require, exports, module ){
+    //todo something
+} ).register();
             </pre>
             <pre class="sh_js">
-    // 注册匿名module，即刻执行
-    hexjs.define( function( require, exports, module ){
-        //todo something
-    } ).register('~');
+// 注册匿名module，即刻执行
+hexjs.define( function( require, exports, module ){
+    //todo something
+} ).register('~');
             </pre>
             <pre class="sh_js">
-    // 注册多个module
-    hexjs.register( ['module-a', 'module-b', '~module-c'] );
+// 注册多个module
+hexjs.register( ['module-a', 'module-b', '~module-c'] );
             </pre>
         </article>
         <article>
             <h1>exports</h1>
             <pre class="sh_js">
-    // 由exports输出API
-    hexjs.define( 'module-a', function( require, exports, module ){
-        exports.a = new Date().getTime(); // --> 1314289663337
-    } );
+// 由exports输出API
+hexjs.define( 'module-a', function( require, exports, module ){
+    exports.a = new Date().getTime(); // --> 1314289663337
+} );
             </pre>
             <pre class="sh_js">
-    // 由return输出API，可输出对象、函数、数组
-    hexjs.define( 'module-b', function( require, exports, module ){
-        return {
-            b: 'bbb'
-        }
-    } );
+// 由return输出API，可输出对象、函数、数组
+hexjs.define( 'module-b', function( require, exports, module ){
+    return {
+        b: 'bbb'
+    }
+} );
             </pre>
             <pre class="sh_js">
-    // 存在return输出时，exports输出失效
-    hexjs.define( 'module-c', function( require, exports, module ){
-        exports.c = '111';
-        exports.d = '222';
-        return {
-            c: 'ccc'
-        }
-        // c --> 'ccc', d --> undefined
-    } );
+// 存在return输出时，exports输出失效
+hexjs.define( 'module-c', function( require, exports, module ){
+    exports.c = '111';
+    exports.d = '222';
+    return {
+        c: 'ccc'
+    }
+    // c --> 'ccc', d --> undefined
+} );
             </pre>
             <pre class="sh_js wrong">
-    // 不能直接覆盖exports，需要输出某个实例时，请使用return或赋值给module.exports
-    hexjs.define( 'module-d', function( require, exports, module ){
-        exports = {
-            a: '111'
-        };
-    } );
+// 不能直接覆盖exports，需要输出某个实例时，请使用return或赋值给module.exports
+hexjs.define( 'module-d', function( require, exports, module ){
+    exports = {
+        a: '111'
+    };
+} );
             </pre>
         </article>
         <article>
             <h1>require</h1>
             <p>引用module以获得该module API，若注册此module则不返回API</p>
             <pre class="sh_js">
-    // 引用module-a
-    // 多次引用同一module，只第一次引用时执行，其后引用只返回API
-    hexjs.define( 'module-e', function( require, exports, module ){
-        var a = require('module-a');
-        // a.a --> '1314289663337'
-    } );
+// 引用module-a
+// 多次引用同一module，只第一次引用时执行，其后引用只返回API
+hexjs.define( 'module-e', ['moddule-a'], function( A, require, exports, module ){
+    var a = require('module-a');
+    // A === a --> true
+    // A.a --> '1314289663337'
+    // a.a --> '1314289663337'
+} );
             </pre>
             <pre class="sh_js">
-    // 增加重新执行选项，module将重新被执行，覆盖原执行结果及其输出API
-    hexjs.define( 'module-f', function( require, exports, module ){
-        var a = require('module-a', true);
-        // a.a --> '1314289701153'
-    } );
+// 增加重新执行选项，module将重新被执行，覆盖原执行结果及其输出API
+hexjs.define( 'module-f', function( require, exports, module ){
+    var a = require('module-a', true);
+    // a.a --> '1314289701153'
+} );
             </pre>
         </article>
         <article>
             <h1>module</h1>
             <h2>module.id</h2>
             <pre class="sh_js">
-    // module.id返回当前module名
-    hexjs.define( 'module-g', function( require, exports, module ){
-        console.info( module.id ); // --> module-g
-    } );
-            </pre>
-            <h2>module.exports</h2>
-            <pre class="sh_js">
-    // 以module.exports来输出API
-    hexjs.define( 'module-h', function( require, exports, module ){
-        module.exports = {
-            a: 'aaa'
-        };
-    } );
+// module.id返回当前module名
+hexjs.define( 'module-g', function( require, exports, module ){
+    console.info( module.id ); // --> module-g
+} );
+        </pre>
+        <h2>module.exports</h2>
+        <pre class="sh_js">
+// 以module.exports来输出API
+hexjs.define( 'module-h', function( require, exports, module ){
+    module.exports = {
+        a: 'aaa'
+    };
+} );
             </pre>
             <h2>module.constructor</h2>
             <pre class="sh_js">
-    // 给module构造器添加方法
-    hexjs.define( 'module-constructor', function( require, exports, module ){
-        var M = module.constructor;
-        
-        M.prototype.getId = function(){
-            return module.id;
-        };
-    } );
+// 给module构造器添加方法
+hexjs.define( 'module-constructor', function( require, exports, module ){
+    var M = module.constructor;
     
-    hexjs.define(function(require, exports, module ){
-        require('module-constructor');
-        console.info( module.getId() ); // --> 'module-constructor'
-    } ).register();
+    M.prototype.getId = function(){
+        return module.id;
+    };
+} );
+
+hexjs.define(function(require, exports, module ){
+    require('module-constructor');
+    console.info( module.getId() ); // --> 'module-constructor'
+} ).register();
             </pre>
         </article>
         <article>
             <h1>noConflict</h1>
             <h2>hexjs.noConflict()</h2>
             <pre class="sh_js">
-    // 使用自定义变量代替hexjs
-    var myHexjs = hexjs.noConflict();
-    myHexjs.define( 'module-name', function(){ ... } );
-    myHexjs.register('module-name');
+// 使用自定义变量代替hexjs
+var myHexjs = hexjs.noConflict();
+myHexjs.define( 'module-name', function(){ ... } );
+myHexjs.register('module-name');
             </pre>
             <h2>hexjs.noConflict(false)</h2>
             <pre class="sh_js">
-    // 使用全局变量'define'代替'hexjs.define'，全局变量'register'代替'hexjs.register'
-    hexjs.noConflict(false);
-    define( 'module-name', function(){ ... } );
-    register('module-name');
+// 使用全局变量'define'代替'hexjs.define'，全局变量'register'代替'hexjs.register'
+hexjs.noConflict(false);
+define( 'module-name', function(){ ... } );
+register('module-name');
             </pre>
             <h2>hexjs.noConflict(true)</h2>
             <pre class="sh_js">
-    // 释放全局变量'define'和'register'
-    hexjs.noConflict(true);
+// 释放全局变量'define'和'register'
+hexjs.noConflict(true);
             </pre>
         </article>
         <article>
             <h1>hexjs.log</h1>
             <pre class="sh_js">
-    // debug输出消息，type类型为'info'/'warn'，默认为'info'
-    hexjs.log( message, type );
+// debug输出消息，type类型为'info'/'warn'，默认为'info'
+hexjs.log( message, type );
             </pre>
         </article>
         <article>
             <h1>debug</h1>
             <pre class="sh_html">
-    &lt;!-- 在访问页面时加上hexjs.debug=ture即进入debug模式 -->
-    <a href="http://hexjs.edgarhoo.org/test/unit.testing.html?hexjs.debug=true">http://hexjs.edgarhoo.org/test/unit.testing.html?hexjs.debug=true</a>
+&lt;!-- 在访问页面时加上hexjs.debug=ture即进入debug模式 -->
+<a href="http://hexjs.edgarhoo.org/test/unit.testing.html?hexjs.debug=true">http://hexjs.edgarhoo.org/test/unit.testing.html?hexjs.debug=true</a>
             </pre>
         </article>
         <script src="http://static.edgarhoo.net/sys/highlight/sh.js"></script>

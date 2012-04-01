@@ -1,15 +1,15 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.4
- * @build   120324
+ * @version v0.5
+ * @build   120401
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * */
 
 (function( global, doc ){
     
-    //"use strict";
+    "use strict";
     
     var hexjs = {},
         modules = {},
@@ -90,20 +90,26 @@
         if ( 'complete' === doc.readyState ){
             _readyInit();
         } else if ( doc.addEventListener ){
-            doc.addEventListener( 'DOMContentLoaded', function(){
-                doc.removeEventListener( 'DOMContentLoaded', arguments.callee, false );
+            
+            var remove = function(){
+                doc.removeEventListener( 'DOMContentLoaded', remove, false );
                 _readyInit();
-            }, false );
+            };
+            
+            doc.addEventListener( 'DOMContentLoaded', remove, false );
             
             global.addEventListener( 'load', _readyInit, false );
         } else if( doc.attachEvent ){
-            // In IE, ensure firing before onload, maybe late but safe also for iframes.
-            doc.attachEvent( 'onreadystatechange', function(){
+            
+            var detach = function(){
                 if ( 'complete' === doc.readyState ) {
-                    doc.detachEvent( 'onreadystatechange', arguments.callee );
+                    doc.detachEvent( 'onreadystatechange', detach );
                     _readyInit();
                 }
-            });
+            };
+            
+            // In IE, ensure firing before onload, maybe late but safe also for iframes.
+            doc.attachEvent( 'onreadystatechange', detach );
             
             global.attachEvent( 'onload', _readyInit );
 
@@ -222,11 +228,13 @@
     /**
      * module constructor
      * @param {string} module id
+     * @param {array} module's dependencies
      * @param {object} module factory
      * */
-    var Module = function( id, factory ){
+    var Module = function( id, deps, factory ){
         
         this.id = id;
+        this.deps = deps || [];
         this.factory = factory;
         this.exports = {};
         this.once = false;
@@ -237,17 +245,42 @@
     /**
      * define module
      * @param {string} module id
+     * @param {array} module's dependencies
      * @param {object|function} module factory
      * */
-    var define = function( id, factory ){
+    var define = function( id, deps, factory ){
         
         var module,
-            anonymousLength;
+            anonymousLength,
+            argsLength = arguments.length;
         
-        if ( 'string' !== typeof id ){
+        if ( argsLength === 1 ){
             factory = id;
             id = '';
+        } else if ( argsLength === 2 ){
+            factory = deps;
+            deps = [];
+            if ( 'string' !== typeof id ){
+                deps = id;
+                id = '';
+            }
         }
+        
+        //if ( !factory ){
+        //    if ( deps ){
+        //        factory = deps;
+        //    } else {
+        //        factory = id;
+        //        id = '';
+        //    }
+            
+        //    if ( 'string' !== typeof id ){
+        //        deps = id;
+        //        id = '';
+        //    } else {
+        //        deps = [];
+        //    }
+        //}
         
         // if id already exists, return
         if ( modules[id] ){
@@ -259,7 +292,7 @@
             factory = { init: factory };
         }
         
-        module = new Module( id, factory );
+        module = new Module( id, deps, factory );
         
         if ( id !== '' ){
             modules[id] = module;
@@ -397,7 +430,9 @@
         
         try {
             if ( isFunction( module.factory.init ) ){
-                var exports = module.factory.init( Require(), module.exports, module );
+                var list = dependencies( module ),
+                    exports = module.factory.init.apply( module.factory, list );
+                //var exports = module.factory.init( Require(), module.exports, module );
                 if ( exports !== undefined ){
                     module.exports = exports;
                 }
@@ -433,6 +468,29 @@
             
         }
         
+    };
+    
+    
+    /**
+     * get dependencies list
+     * @param {object} module
+     * */
+    var dependencies = function( module ){
+        
+        var list = [],
+            deps = module.deps;
+        
+        if ( isArray( deps ) ){
+            forEach( deps, function( id ){
+                list.push( __require.call( null, id ) );
+            } );
+        }
+        
+        list.push( Require() );
+        list.push( module.exports );
+        list.push( module );
+        
+        return list;
     };
     
     
@@ -472,7 +530,7 @@
     hexjs.register = register;
     hexjs.log = log;
     hexjs.noConflict = noConflict;
-    hexjs.version = '0.4';
+    hexjs.version = '0.5';
     
     global.hexjs = hexjs;
     

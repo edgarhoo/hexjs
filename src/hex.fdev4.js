@@ -1,8 +1,8 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.4
- * @build   120324
+ * @version v0.5
+ * @build   120401
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * 
@@ -44,11 +44,13 @@
     /**
      * module constructor
      * @param {string} module id
+     * @param {array} module's dependencies
      * @param {object} module factory
      * */
-    var Module = function( id, factory ){
+    var Module = function( id, deps, factory ){
         
         this.id = id;
+        this.deps = deps || [];
         this.factory = factory;
         this.exports = {};
         this.once = false;
@@ -59,16 +61,25 @@
     /**
      * define module
      * @param {string} module id
+     * @param {array} module's dependencies
      * @param {object|function} module factory
      * */
-    var define = function( id, factory ){
+    var define = function( id, deps, factory ){
         
         var module,
-            anonymousLength;
+            anonymousLength,
+            argsLength = arguments.length;
         
-        if ( 'string' !== typeof id ){
+        if ( argsLength === 1 ){
             factory = id;
             id = '';
+        } else if ( argsLength === 2 ){
+            factory = deps;
+            deps = [];
+            if ( 'string' !== typeof id ){
+                deps = id;
+                id = '';
+            }
         }
         
         // if id already exists, return
@@ -81,7 +92,7 @@
             factory = { init: factory };
         }
         
-        module = new Module( id, factory );
+        module = new Module( id, deps, factory );
         
         if ( id !== '' ){
             modules[id] = module;
@@ -217,7 +228,8 @@
         
         try {
             if ( isFunction( module.factory.init ) ){
-                var exports = module.factory.init( Require(), module.exports, module );
+                var list = dependencies( module ),
+                    exports = module.factory.init.apply( module.factory, list );
                 if ( exports !== undefined ){
                     module.exports = exports;
                 }
@@ -253,6 +265,29 @@
             
         }
         
+    };
+    
+    
+    /**
+     * get dependencies list
+     * @param {object} module
+     * */
+    var dependencies = function( module ){
+        
+        var list = [],
+            deps = module.deps;
+        
+        if ( isArray( deps ) ){
+            each( deps, function( i, id ){
+                list.push( __require.call( null, id ) );
+            } );
+        }
+        
+        list.push( Require() );
+        list.push( module.exports );
+        list.push( module );
+        
+        return list;
     };
     
     
@@ -293,7 +328,7 @@
     hexjs.register = register;
     hexjs.log = log;
     hexjs.noConflict = noConflict;
-    hexjs.version = '0.4';
+    hexjs.version = '0.5';
     
     global.hexjs = hexjs;
     

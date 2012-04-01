@@ -14,15 +14,15 @@
              * */
             hexjs.define( 'ut', function( require, exports, module ){
                 
-                var output = function( fn, type, color ){
-                    jQuery( '#' + fn ).css( 'color',  color ).html( fn + ' ' + type );
+                var output = function( id, desc, type, color ){
+                    jQuery( '#' + id ).css( 'color',  color ).html( type + ': ' + desc + '.' );
                 };
                 
-                exports.print = function( message, fn ){
+                exports.print = function( message, desc, id ){
                     if ( !!message ){
-                        output( fn, 'pass', 'green' );
+                        output( id, desc, 'pass', 'green' );
                     } else {
-                        output( fn, 'fail', 'red' );
+                        output( id, desc, 'fail', 'red' );
                     }
                 };
                 
@@ -32,8 +32,8 @@
             /**
              * @module register-ready
              * */
-            hexjs.define( 'register-ready', function( require ){
-                require('ut').print( true, 'register-ready' );
+            hexjs.define( 'register-ready', ['ut'], function( ut ){
+                ut.print( true, 'register module after DOMReady', 'register-ready' );
             } );
 
 
@@ -56,7 +56,15 @@
                 exports.variable = 'define';
             } );
 
+            
+            /**
+             * @module define-function
+             * */
+            hexjs.define( 'define-function', function(){
+                return 'define-function';
+            } );
 
+            
             /**
              * @module define-object-init
              * */
@@ -66,6 +74,17 @@
                 },
                 _variable: 'define-object-init'
                 
+            } );
+
+            
+            /**
+             * @module define-normal
+             * */
+            hexjs.define( 'define-pre', function(){
+                return 'define-pre';
+            } );
+            hexjs.define( 'define-normal', ['define-pre'], function( pre, require, exports ){
+                exports.variable = pre;
             } );
 
 
@@ -264,37 +283,72 @@
             
             hexjs.register('~register-now');
             
+            hexjs.define( ['ut'], function( ut, require, exports, module ){
+                module.id = ' register register-anonymous-ready';
+                ut.print( jQuery('#register-ready').html(), 'register anonymous module after DOMReady', 'register-anonymous-ready' );
+            }).register();
+            
             hexjs.define(function( require, exports, module ){
-                module.id = 'register register-now';
-                require('ut').print( require('register-now').isEmpty, 'register-now' );
+                module.id = ' register register-anonymous-now';
+                hexjs.log( 'register anonymous module now' );
+            }).register('~');
+            
+            hexjs.define(function( require, exports, module ){
+                module.id = ' register register-now';
+                require('ut').print( require('register-now').isEmpty, 'register module now', 'register-now' );
             }).register();
             
             hexjs.register( ['register-multi-a','~register-multi-b'] );
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register define-repeat';
-                require('ut').print( require('define-repeat').variable === 'repeat', 'define-not-repeat' );
+                module.id = ' register define-repeat';
+                require('ut').print( require('define-repeat').variable === 'repeat', 'define module can not repeat', 'define-not-repeat' );
             }).register();
             
-            hexjs.define(function( require, exports, module ){
-                module.id = 'register define-object-init';
-                require('ut').print( require('define-object-init').variable === 'define-object-init', 'define-object-init' );
+            hexjs.define( ['ut', 'define-function'], function( ut, mod, require, exports, module ){
+                module.id = ' register define-function';
+                ut.print( mod === 'define-function', 'define( id, fn )', 'define-function' );
             } ).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register require';
-                require('require').print( true, 'require');
+                module.id = ' register define-object-init';
+                require('ut').print( require('define-object-init').variable === 'define-object-init', 'define( id, { init: fn } )', 'define-object-init' );
             } ).register();
             
-            hexjs.define(function( require, exports, module ){
-                module.id = 'register require-refresh';
-                require('ut').print( require('require-refresh').variable !== require('require-refresh',true).variable, 'require-refresh' );
+            hexjs.define( ['ut', 'define-normal'], function( ut, mod, require, exports, module ){
+                module.id = ' register define-normal';
+                ut.print( mod.variable === 'define-pre', 'define( id, deps, fn )', 'define-normal' );
+            }).register();
+            
+            hexjs.define( ['ut', 'define-pre'], function( ut, mod, require, exports, module ){
+                module.id = ' register define-anonymous-deps';
+                ut.print( mod === 'define-pre', 'define( deps, fn )', 'define-anonymous-deps' );
             }).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register require-readonly';
+                module.id = ' register define-anonymous';
+                require('ut').print( require('define-pre') === 'define-pre', 'define( fn )', 'define-anonymous' );
+            }).register();
+            
+            hexjs.define( ['ut'], function( ut, require, exports, module ){
+                module.id = ' register require-deps';
+                ut.print( true, 'require module by dependencies', 'require-deps' );
+            } ).register();
+            
+            hexjs.define(function( require, exports, module ){
+                module.id = ' register require';
+                require('require').print( true, 'require module', 'require');
+            }).register();
+            
+            hexjs.define(function( require, exports, module ){
+                module.id = ' register require-refresh';
+                require('ut').print( require('require-refresh').variable !== require('require-refresh',true).variable, 'require module and refresh it', 'require-refresh' );
+            }).register();
+            
+            hexjs.define(function( require, exports, module ){
+                module.id = ' register require-readonly';
                 require('require-readonly');
-                require('ut').print( require.variable !== 'require-readonly', 'require-readonly' );
+                require('ut').print( require.variable !== 'require-readonly', 'the "require" keyword readonly', 'require-readonly' );
             }).register();
             
             //hexjs.define(function(require){
@@ -302,77 +356,77 @@
             //}).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register exports';
-                require('ut').print( require('exports').variable === 'exports', 'exports' );
+                module.id = ' register exports';
+                require('ut').print( require('exports').variable === 'exports', 'exports API', 'exports' );
             } ).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register exports-not-cover';
-                require('ut').print( require('exports-not-cover').variable !== 'variable', 'exports-not-cover' );
+                module.id = ' register exports-not-cover';
+                require('ut').print( require('exports-not-cover').variable !== 'variable', 'the "exports" keyword can not be assigned', 'exports-not-cover' );
             } ).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register exports-return';
-                require('ut').print( require('exports-return').variable === 'exports-return', 'exports-return' );
+                module.id = ' register exports-return';
+                require('ut').print( require('exports-return').variable === 'exports-return', 'exports API by "return"', 'exports-return' );
             } ).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register exports-return-function';
-                require('ut').print( require('exports-return-function')() === 'exports-return-function', 'exports-return-function' );
+                module.id = ' register exports-return-function';
+                require('ut').print( require('exports-return-function')() === 'exports-return-function', 'exports API as function', 'exports-return-function' );
             } ).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register exports-return-array';
-                require('ut').print( jQuery.isArray( require('exports-return-array') ) && require('exports-return-array')[0] === 'exports-return-array', 'exports-return-array' );
+                module.id = ' register exports-return-array';
+                require('ut').print( jQuery.isArray( require('exports-return-array') ) && require('exports-return-array')[0] === 'exports-return-array', 'exports API as array', 'exports-return-array' );
             } ).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register exports-return-simplify';
-                require('ut').print( require('exports-return-simplify').variable === 'exports-return-simplify', 'exports-return-simplify' );
+                module.id = ' register exports-return-simplify';
+                require('ut').print( require('exports-return-simplify').variable === 'exports-return-simplify', 'define( id, object ) & exports API as object/json', 'exports-return-simplify' );
             } ).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register exports-return-cover';
-                require('ut').print( require('exports-return-cover').variable === 'exports-return-cover' && require('exports-return-cover').value !== 'value', 'exports-return-cover' );
+                module.id = ' register exports-return-cover';
+                require('ut').print( require('exports-return-cover').variable === 'exports-return-cover' && require('exports-return-cover').value !== 'value', 'exports API, "return" result will cover "exports"', 'exports-return-cover' );
             } ).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register module-exports';
-                require('ut').print( require('module-exports').variable === 'module-exports', 'module-exports' );
+                module.id = ' register module-exports';
+                require('ut').print( require('module-exports').variable === 'module-exports', 'exports API by "module.exports"', 'module-exports' );
             } ).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register module-id';
-                require('ut').print( require('module-id').id === 'module-id', 'module-id' );
+                module.id = ' register module-id';
+                require('ut').print( require('module-id').id === 'module-id', 'use module.id', 'module-id' );
             } ).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register module-constructor';
+                module.id = ' register module-constructor';
                 require('module-constructor');
-                require('ut').print( module.getId() === 'module-constructor', 'module-constructor' );
+                require('ut').print( module.getId() === 'module-constructor', 'use module constructor', 'module-constructor' );
             } ).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register register-multi';
-                require('ut').print( require('register-multi').get() === 2, 'register-multi' );
+                module.id = ' register register-multi';
+                require('ut').print( require('register-multi').get() === 2, 'hexjs.register(["module-a","module-b"]): register more modules with array', 'register-multi' );
             }).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register noConflict-false';
+                module.id = ' register noConflict-false';
                 hexjs.register('~noConflict-false');
-                require('ut').print( define === hexjs.define && register === hexjs.register, 'noConflict-false' );
+                require('ut').print( define === hexjs.define && register === hexjs.register, 'hexjs.noConflict(false): "define","register" conflict global', 'noConflict-false' );
             }).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register noConflict-true';
+                module.id = ' register noConflict-true';
                 hexjs.register('~noConflict-true');
-                require('ut').print( define !== hexjs.define && register !== hexjs.register, 'noConflict-true' );
+                require('ut').print( define !== hexjs.define && register !== hexjs.register, 'hexjs.noConflict(true): cancel conflict of "define" and "register"', 'noConflict-true' );
             }).register();
             
             hexjs.define(function( require, exports, module ){
-                module.id = 'register noConflict-undefined';
+                module.id = ' register noConflict-undefined';
                 hexjs.register('~noConflict-undefined');
-                require('ut').print( hexjs === undefined, 'noConflict-undefined' );
+                require('ut').print( hexjs === undefined, 'hexjs.noConflict(): cancel conflict of "hexjs"', 'noConflict-undefined' );
                 window.hexjs = hexjsTemp;
             }).register();
         </script>
@@ -382,8 +436,14 @@
         <ul id="hexjs-ut-output">
             <li id="register-ready"></li>
             <li id="register-now"></li>
+            <li id="register-anonymous-ready"></li>
             <li id="define-not-repeat"></li>
+            <li id="define-function"></li>
             <li id="define-object-init"></li>
+            <li id="define-normal"></li>
+            <li id="define-anonymous-deps"></li>
+            <li id="define-anonymous"></li>
+            <li id="require-deps"></li>
             <li id="require"></li>
             <li id="require-refresh"></li>
             <li id="require-readonly"></li>

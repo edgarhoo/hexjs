@@ -9,10 +9,11 @@ HexJS: a page-level module manager
 ## Usage
  * Manual: http://hexjs.edgarhoo.org/docs/manual.html
  * 使用手册: http://hexjs.edgarhoo.org/docs/manual.zh-cn.html
- * Unit Testing: http://hexjs.edgarhoo.org/test/unit.testing.html
+ * Unit Testing: http://hexjs.edgarhoo.org/test/unit.testing.html?hexjs.debug=true
 
 ## Change Log
- * 03.23.2012 v0.4 去除exports clone机制，以增加其类型，调整log函数，并对外开放
+ * 04.01.2012 v0.5 支持define module时声明其依赖并入参
+ * 03.24.2012 v0.4 去除exports clone机制，以增加其类型，调整log函数，并对外开放
  * 03.20.2012 v0.3.2 修复log机制，区分module不存在与register失败
  * 03.12.2012 v0.3.1.1 HexJS(fdev4)配合fdev4调整对console存在与否的判断
  * 03.09.2012 v0.3.1 调整log机制，register失败时输出message
