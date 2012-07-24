@@ -1,44 +1,62 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.5
- * @build   120401
+ * @version v0.6
+ * @build   120724
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * 
- * @base    fdev-v4, http://static.c.aliimg.com/js/lib/fdev-v4/core/fdev-min.js
+ * @base    fdev-v4, http://style.china.alibaba.com/fdevlib/js/fdev-v4/core/fdev-min.js
  * */
 
 (function( $, global ){
     
-    "use strict";
+    'use strict';
     
     var hexjs = {},
         modules = {},
         anonymousModules = [],
-        isDebug = global.location.search.indexOf('hexjs.debug=true') > -1,
+        isDebug = false,
+        logSource = 'HexJS',
+        //isDebug = global.location.search.indexOf('hexjs.debug=true') > -1,
         
     isFunction = $.isFunction,
     isArray = $.isArray,
-    each = $.each;
+    each = $.each,
+    now = $.now,
+    noop = function(){};
 
 
     /**
-     * output message
-     * @param {string} message
-     * @param {string} message type
+     * log
      * */
-    var log = isDebug ? ( 
-                !!global.console && global.console.warn ? 
-                function( message, type ){
-                    type = type || 'info';
-                    global.console[type]( message );
-                } :
-                function( message, type ){
-                    $.use( 'util-debug', function(){
-                        $.log( message );
-                    } );
-                } ) : function(){};
+    var log = noop,
+    
+    logInfo = function( message, type ){
+        message = ( logSource ? '[' + logSource + ']: ' : '' ) + now() + ': ' + message;
+        log( message, type || 'info' );
+    },
+    
+    logWarn = function( message ){
+        logInfo( message, 'warn' );
+    };
+    
+    
+    /**
+     * create log
+     * */
+    var createLog = function(){
+        return !!global.console && global.console.warn ? 
+            function( message, type ){
+                type = type || 'info';
+                global.console[type]( message );
+            } :
+            function( message, type ){
+                $.use( 'util-debug', function(){
+                    $.log( message );
+                } );
+            };
+    };
     
     
     /**
@@ -54,6 +72,7 @@
         this.factory = factory;
         this.exports = {};
         this.once = false;
+        this.visits = 0;
         
     };
     
@@ -84,7 +103,7 @@
         
         // if id already exists, return
         if ( modules[id] ){
-            log( $.now() + ': the module "' + id + '" already exists. ', 'warn' );
+            isDebug && logWarn( 'the module "' + id + '" already exists.' );
             return null;
         }
         
@@ -125,7 +144,7 @@
             return;
         }
         
-        ids = id.split('~');
+        ids =  id.indexOf('~') === 0 ? id.split('~') : [id];
         
         if ( ids.length === 1 ){
             id = ids[0];
@@ -139,12 +158,12 @@
         }
         
         if ( !module ){
-            id !== '' && log( $.now() + ': the module "' + id + '" does not exist. ', 'warn' );
+            isDebug && id !== '' && logWarn( 'the module "' + id + '" does not exist.' );
             return null;
         }
         
         if ( module.once ){
-            id !== '' && log( $.now() + ': the module "' + id + '" already registered. ', 'warn' );
+            isDebug && id !== '' && logWarn( 'the module "' + id + '" already registered.' );
             return null;
         }
         
@@ -152,9 +171,9 @@
         
         isReady ?
             $(function(){
-                execute( module, 'register', 'after ready' );
+                execute( module, 'register' );
             }) :
-            execute( module, 'register', 'now' );
+            execute( module, 'register' );
         
     };
     
@@ -203,6 +222,11 @@
             execute( module, 'require' );
         }
         
+        module.visits++;
+        if ( isDebug && module.visits > 1 ){
+            logInfo( 'the module "' + module.id + '" required [' + module.visits + '].' );
+        }
+        
         return module.exports;
     };
     
@@ -225,6 +249,7 @@
      * @param {string} execute status
      * */
     var execute = function( module, type, status ){
+        var message = '';
         
         try {
             if ( isFunction( module.factory.init ) ){
@@ -238,29 +263,22 @@
             }
             
             if ( isDebug ){
-                var now = $.now();
-                if ( '' === module.id ){
-                    log( now + ': the module anonymous_' + module._idx + ' registered. ' + status + ' execute.' );
-                    return;
-                }
-                
-                'register' === type ?
-                    log( now + ': the module "' + module.id + '" registered. ' + status + ' execute.' ) :
-                    log( now + ': the module "' + module.id + '" required.' );
+                message = '' === module.id ?
+                    'the module anonymous_' + module._idx + ' registered.' :
+                    'the module "' + module.id + '" ' + ( 'register' === type ? 'registered' : 'initialized' ) + '.';
+
+                logInfo( message );
             }
             
         } catch(e) {
             
             if ( isDebug ){
-                var now = $.now();
-                if ( '' === module.id ){
-                    log( now + ': the module anonymous_' + module._idx + ' failed to register. The message: "' + e.message + '".', 'warn' );
-                    return;
-                }
+                message = '' === module.id ?
+                    'the module anonymous_' + module._idx + ' failed to register.':
+                    'the module "' + module.id + '" failed to ' + ( 'register' === type ? 'register' : 'initialize' ) + '.';
+                message += ' The message: "' + e.message + '".';
                 
-                'register' === type ?
-                    log( now + ': the module "' + module.id + '" failed to register. The message: "' + e.message + '".', 'warn' ) :
-                    log( now + ': the module "' + module.id + '" failed to require. The message: "' + e.message + '".', 'warn' );
+                logWarn( message );
             }
             
         }
@@ -324,11 +342,58 @@
     };
     
     
+    /**
+     * config
+     * @param {object} config
+     * */
+    var config = function(o){
+        var logLevel = o.logLevel;
+        if ( logLevel ){
+            //logLevel = ['debug','log'].indexOf(logLevel) > -1 ? logLevel : 'none';
+            switch( logLevel ){
+                case 'debug':
+                    log = createLog();
+                    isDebug = true;
+                    hexjs._modules = modules;
+                    hexjs._anonymous = anonymousModules;
+                    break;
+                case 'log':
+                    isDebug = false;
+                    log = createLog();
+                    break;
+                default:
+                    isDebug = false;
+                    log = noop;
+            }
+        }
+        
+        if ( o.logSource ){
+            logSource = o.logSource;
+        }
+    };
+    
+    
+    config({
+        logLevel: function(){
+            var search = global.location.search,
+                logLevel = 'none';
+            if ( search.indexOf('hexjs.debug=true') > -1 ){
+                logLevel = 'debug';
+            }
+            if ( search.indexOf('hexjs.debug=log') > -1 ){
+                logLevel = 'log';
+            }
+            return logLevel;
+        }()
+    });
+    
+    
     hexjs.define = define;
     hexjs.register = register;
     hexjs.log = log;
+    hexjs.config = config;
     hexjs.noConflict = noConflict;
-    hexjs.version = '0.5';
+    hexjs.version = '0.6';
     
     global.hexjs = hexjs;
     

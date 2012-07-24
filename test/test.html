@@ -28,8 +28,8 @@
             hexjs.define( 'ab', function( require, exports, module ){
                 exports.variable = 'require module b';
             } );
-            hexjs.define(function( require ){
-                var test = require('test'), a;
+            hexjs.define( ['test'], function( test, require ){
+                var a;
                 test.print('<strong>测试根据条件require不同module：</strong>');
                 if ( false ){
                     test.print(require('aa').variable);

@@ -12,6 +12,7 @@ HexJS: a page-level module manager
  * Unit Testing: http://hexjs.edgarhoo.org/test/unit.testing.html?hexjs.debug=true
 
 ## Change Log
+ * 07.24.2012 v0.6 增加config，调整log机制
  * 04.01.2012 v0.5 支持define module时声明其依赖并入参
  * 03.24.2012 v0.4 去除exports clone机制，以增加其类型，调整log函数，并对外开放
  * 03.20.2012 v0.3.2 修复log机制，区分module不存在与register失败
