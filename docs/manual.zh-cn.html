@@ -17,7 +17,7 @@
             </ul>
         </nav>
         <article>
-            <h1>define</h1>
+            <h1>hexjs.define</h1>
             <pre class="sh_js">
 // 定义module
 hexjs.define( id?, dependencies?, factory );
@@ -62,7 +62,7 @@ hexjs.define( ['module-a','module-b'], function( a, b, require, exports, module 
             </pre>
         </article>
         <article>
-            <h1>register</h1>
+            <h1>hexjs.register</h1>
             <p>注册module时，选择执行类型。多次注册同一module，只执行第一次</p>
             <pre class="sh_js">
 // 注册module，DOM ready之后执行
@@ -92,13 +92,13 @@ hexjs.register( ['module-a', 'module-b', '~module-c'] );
         <article>
             <h1>exports</h1>
             <pre class="sh_js">
-// 由exports输出API
+// 由'exports'输出API
 hexjs.define( 'module-a', function( require, exports, module ){
     exports.a = new Date().getTime(); // --> 1314289663337
 } );
             </pre>
             <pre class="sh_js">
-// 由return输出API，可输出对象、函数、数组
+// 由'return'输出API，可输出对象、函数、数组
 hexjs.define( 'module-b', function( require, exports, module ){
     return {
         b: 'bbb'
@@ -106,7 +106,7 @@ hexjs.define( 'module-b', function( require, exports, module ){
 } );
             </pre>
             <pre class="sh_js">
-// 存在return输出时，exports输出失效
+// 存在'return'输出时，'exports'输出失效
 hexjs.define( 'module-c', function( require, exports, module ){
     exports.c = '111';
     exports.d = '222';
@@ -117,7 +117,7 @@ hexjs.define( 'module-c', function( require, exports, module ){
 } );
             </pre>
             <pre class="sh_js wrong">
-// 不能直接覆盖exports，需要输出某个实例时，请使用return或赋值给module.exports
+// 不能直接覆盖'exports'，需要输出某个实例时，请使用'return'或赋值给'module.exports'
 hexjs.define( 'module-d', function( require, exports, module ){
     exports = {
         a: '111'
@@ -150,14 +150,14 @@ hexjs.define( 'module-f', function( require, exports, module ){
             <h1>module</h1>
             <h2>module.id</h2>
             <pre class="sh_js">
-// module.id返回当前module名
+// 'module.id'返回当前module名
 hexjs.define( 'module-g', function( require, exports, module ){
     console.info( module.id ); // --> module-g
 } );
         </pre>
         <h2>module.exports</h2>
         <pre class="sh_js">
-// 以module.exports来输出API
+// 以'module.exports'来输出API
 hexjs.define( 'module-h', function( require, exports, module ){
     module.exports = {
         a: 'aaa'
@@ -206,12 +206,22 @@ hexjs.noConflict(true);
         <article>
             <h1>hexjs.log</h1>
             <pre class="sh_js">
-// debug输出消息，type类型为'info'/'warn'，默认为'info'
+// 当'logLevel'为'debug'或'log'时输出消息，'type'类型为'info'/'warn'，默认为'info'
 hexjs.log( message, type );
             </pre>
         </article>
         <article>
-            <h1>debug</h1>
+            <h1>hexjs.config</h1>
+            <pre class="sh_js">
+// HexJS配置
+hexjs.config({
+    logSource: 'myHexJS', // 设置日志来源
+    logLevel: 'debug/log' // 'debug': 进入dubug模式; 'log': 只输出用户操作的日志
+});
+            </pre>
+        </article>
+        <article>
+            <h1>hexjs.debug</h1>
             <pre class="sh_html">
 &lt;!-- 在访问页面时加上hexjs.debug=ture即进入debug模式 -->
 <a href="http://hexjs.edgarhoo.org/test/unit.testing.html?hexjs.debug=true">http://hexjs.edgarhoo.org/test/unit.testing.html?hexjs.debug=true</a>

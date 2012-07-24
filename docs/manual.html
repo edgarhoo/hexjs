@@ -17,7 +17,7 @@
             </ul>
         </nav>
         <article>
-            <h1>define</h1>
+            <h1>hexjs.define</h1>
             <pre class="sh_js">
 // define a module with function
 hexjs.define( id?, dependencies?, factory );
@@ -62,7 +62,7 @@ hexjs.define( ['module-a','module-b'], function( a, b, require, exports, module 
             </pre>
         </article>
         <article>
-            <h1>register</h1>
+            <h1>hexjs.register</h1>
             <pre class="sh_js">
 // register a module, and it will be executed after ready
 hexjs.register('module-id');
@@ -92,13 +92,13 @@ hexjs.register( ['module-a', 'module-b', '~module-c'] );
         <article>
             <h1>exports</h1>
             <pre class="sh_js">
-// output API from exports
+// output API from 'exports'
 hexjs.define( 'module-a', function( require, exports, module ){
     exports.a = new Date().getTime(); // --> 1314289663337
 } );
             </pre>
             <pre class="sh_js">
-// output API from return, output object, function, array
+// output API from 'return', output object, function, array
 hexjs.define( 'module-b', function( require, exports, module ){
     return {
         b: 'bbb'
@@ -117,7 +117,7 @@ hexjs.define( 'module-c', function( require, exports, module ){
 } );
             </pre>
             <pre class="sh_js wrong">
-// not covered the exports, need to output an instance, use 'return' or assign to 'module.exports'
+// not covered the 'exports', need to output an instance, use 'return' or assign to 'module.exports'
 hexjs.define( 'module-d', function( require, exports, module ){
     exports = {
         a: '111'
@@ -148,14 +148,14 @@ hexjs.define( 'module-f', function( require, exports, module ){
             <h1>module</h1>
             <h2>module.id</h2>
             <pre class="sh_js">
-// module.id returns the current module name
+// 'module.id' returns the current module name
 hexjs.define( 'module-g', function( require, exports, module ){
     console.info( module.id ); // --> module-g
 } );
             </pre>
             <h2>module.exports</h2>
             <pre class="sh_js">
-// output API from module.exports
+// output API from 'module.exports'
 hexjs.define( 'module-h', function( require, exports, module ){
     module.exports = {
         a: 'aaa'
@@ -204,12 +204,22 @@ hexjs.noConflict(true);
         <article>
             <h1>hexjs.log</h1>
             <pre class="sh_js">
-// output debug message，type: 'info' or 'warn', default is 'info'
+// when 'logLevel': 'debug' or 'log', output debug message，type: 'info' or 'warn', default is 'info'
 hexjs.log( message, type );
             </pre>
         </article>
         <article>
-            <h1>debug</h1>
+            <h1>hexjs.config</h1>
+            <pre class="sh_js">
+// config HexJS
+hexjs.config({
+    logSource: 'myHexJS', // set log source
+    logLevel: 'debug/log' // 'debug': enter debug mode; 'log': output user's log only
+});
+            </pre>
+        </article>
+        <article>
+            <h1>hexjs.debug</h1>
             <pre class="sh_html">
 &lt;!-- when accessing the page with 'hexjs.debug=ture', enters debug mode -->
 <a href="http://hexjs.edgarhoo.org/test/unit.testing.html?hexjs.debug=true">http://hexjs.edgarhoo.org/test/unit.testing.html?hexjs.debug=true</a>
