@@ -281,15 +281,18 @@
              */
             hexjs.define( 'config-logSource', function(){
                 hexjs.config({
-                    logSource: 'HexJSUnitTest'
+                    logSource: 'HexJSUnitTesting'
                 });
             } );
             hexjs.define( 'config-logLevel', function(){
                 hexjs.config({
                     logLevel: 'log'
                 });
+            } );
+            hexjs.define( 'config', function(){
                 hexjs.log('pass: hexjs.config');
             } );
+            
             
             hexjs.register('register-ready');
             hexjs.register('register-ready');
@@ -454,6 +457,7 @@
             
             hexjs.register('config-logSource');
             hexjs.register('config-logLevel');
+            hexjs.register('config');
         </script>
     </head>
     <body style="width:800px;margin:0 auto;">

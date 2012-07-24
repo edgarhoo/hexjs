@@ -565,6 +565,8 @@
                     isDebug = false;
                     log = noop;
             }
+            
+            hexjs.log = log;
         }
         
         if ( o.logSource ){
@@ -590,7 +592,6 @@
     
     hexjs.define = define;
     hexjs.register = register;
-    hexjs.log = log;
     hexjs.config = config;
     hexjs.noConflict = noConflict;
     hexjs.version = '0.6';
