@@ -4,7 +4,7 @@
         <meta charset="utf-8"/>
         <title>HexJS Manual</title>
         <meta name="author" content="Edgar Hoo, edgarhoo.net"/>
-        <meta name="date" content="Apr 1, 2012"/>
+        <meta name="date" content="Aug 15, 2012"/>
         <link rel="stylesheet" href="http://static.edgarhoo.net/sys/highlight/sh.css"/>
     </head>
     <body>
@@ -22,42 +22,50 @@
 // define a module with function
 hexjs.define( id?, dependencies?, factory );
 
-hexjs.define( 'module-id', ['module-a'], function( a, require, exports, module ){
-    //todo something
+hexjs.define( 'module-id', ['require','exports','module'], function( require, exports, module ){
+    // HexJS provides three basic modules: 'require', 'exports', 'module'
 } );
 
-hexjs.define( 'module-id', ['module-a','module-b'], function( a, b, require, exports, moudle ){
-    //todo something
+hexjs.define( 'module-id', ['module-a'], function( a ){
+    // todo something
 } );
 
-hexjs.define( 'module-id', function( require, exports, module ){
-    //todo something
+hexjs.define( 'module-id', ['module-a','module-b'], function( a, b, ){
+    // todo something
+} );
+
+hexjs.define( 'module-id', function(){
+    // todo something
 } );
             </pre>
             <pre class="sh_js">
-// define a module with object, this object contains the initialization function named 'init', require that the module is the first implementation of the 'init' function and returns its results, if there is no 'init' function, it returns the object
-hexjs.define( 'module-id', {
-    init: function( require, exports, module ){
-        //todo something
+// define a module with object, this object contains the initialization function named 'init',
+// require that the module is the first implementation of the 'init' function and returns its results,
+// if there is no 'init' function, it returns the object.
+hexjs.define( 'module-id', ['exports','require','module'], {
+    init: function( exports, require, module ){
+        // todo something
+        // this._other();
     },
     _other: function(){}
 } );
 
 hexjs.define( 'module-id', ['module-a','module-b'], {
-    init: function( a, b, require, exports, module ){
-        //todo something
+    init: function( a, b ){
+        // todo something
+        // this._other();
     },
     _other: function(){}
 } );
             </pre>
             <pre class="sh_js">
 // define an anonymous module
-hexjs.define( function( require, exports, module ){
-    //todo something
+hexjs.define( function(){
+    // todo something
 } );
 
-hexjs.define( ['module-a','module-b'], function( a, b, require, exports, module ){
-    //todo something
+hexjs.define( ['require','module-a','module-b'], function( require, a, b ){
+    // todo something
 } );
             </pre>
         </article>
@@ -74,14 +82,14 @@ hexjs.register('~module-id');
             </pre>
             <pre class="sh_js">
 // register an anonymous module, and it will be executed after ready
-hexjs.define( function( require, exports, module ){
-    //todo something
+hexjs.define( ['require'], function( require ){
+    // todo something
 } ).register();
             </pre>
             <pre class="sh_js">
 // register an anonymous module, and it will be executed now
-hexjs.define( function( require, exports, module ){
-    //todo something
+hexjs.define( ['require'], function( require ){
+    // todo something
 } ).register('~');
             </pre>
             <pre class="sh_js">
@@ -93,13 +101,13 @@ hexjs.register( ['module-a', 'module-b', '~module-c'] );
             <h1>exports</h1>
             <pre class="sh_js">
 // output API from 'exports'
-hexjs.define( 'module-a', function( require, exports, module ){
+hexjs.define( 'module-a', ['exports'], function( exports ){
     exports.a = new Date().getTime(); // --> 1314289663337
 } );
             </pre>
             <pre class="sh_js">
 // output API from 'return', output object, function, array
-hexjs.define( 'module-b', function( require, exports, module ){
+hexjs.define( 'module-b', function(){
     return {
         b: 'bbb'
     }
@@ -107,7 +115,7 @@ hexjs.define( 'module-b', function( require, exports, module ){
             </pre>
             <pre class="sh_js">
 // if 'return' exists, 'exports' will failure
-hexjs.define( 'module-c', function( require, exports, module ){
+hexjs.define( 'module-c', ['exports'], function( exports ){
     exports.c = '111';
     exports.d = '222';
     return {
@@ -118,7 +126,7 @@ hexjs.define( 'module-c', function( require, exports, module ){
             </pre>
             <pre class="sh_js wrong">
 // not covered the 'exports', need to output an instance, use 'return' or assign to 'module.exports'
-hexjs.define( 'module-d', function( require, exports, module ){
+hexjs.define( 'module-d', ['exports'], function( exports ){
     exports = {
         a: '111'
     };
@@ -129,7 +137,7 @@ hexjs.define( 'module-d', function( require, exports, module ){
             <h1>require</h1>
             <pre class="sh_js">
 // require module-a
-hexjs.define( 'module-e', ['moddule-a'], function( A, require, exports, module ){
+hexjs.define( 'module-e', ['require','moddule-a'], function( require, A ){
     var a = require('module-a');
     // A === a --> true
     // A.a --> '1314289663337'
@@ -138,7 +146,7 @@ hexjs.define( 'module-e', ['moddule-a'], function( A, require, exports, module )
             </pre>
             <pre class="sh_js">
 // set the re-run option is 'true', the module will executed again, and covering the original results
-hexjs.define( 'module-f', function( require, exports, module ){
+hexjs.define( 'module-f', ['require'], function( require ){
     var a = require('module-a', true);
     // a.a --> '1314289701153'
 } );
@@ -149,14 +157,14 @@ hexjs.define( 'module-f', function( require, exports, module ){
             <h2>module.id</h2>
             <pre class="sh_js">
 // 'module.id' returns the current module name
-hexjs.define( 'module-g', function( require, exports, module ){
+hexjs.define( 'module-g', ['module'], function( module ){
     console.info( module.id ); // --> module-g
 } );
             </pre>
             <h2>module.exports</h2>
             <pre class="sh_js">
 // output API from 'module.exports'
-hexjs.define( 'module-h', function( require, exports, module ){
+hexjs.define( 'module-h', ['module'], function( module ){
     module.exports = {
         a: 'aaa'
     };
@@ -165,7 +173,7 @@ hexjs.define( 'module-h', function( require, exports, module ){
             <h2>module.constructor</h2>
             <pre class="sh_js">
 // add some method or property to the module constructor
-hexjs.define( 'module-constructor', function( require, exports, module ){
+hexjs.define( 'module-constructor', ['module'], function( module ){
     var M = module.constructor;
     
     M.prototype.getId = function(){
@@ -173,7 +181,7 @@ hexjs.define( 'module-constructor', function( require, exports, module ){
     };
 } );
 
-hexjs.define(function(require, exports, module ){
+hexjs.define( ['require','module'], function( require, module ){
     require('module-constructor');
     console.info( module.getId() ); // --> 'module-constructor'
 } ).register();
@@ -185,15 +193,15 @@ hexjs.define(function(require, exports, module ){
             <pre class="sh_js">
 // you can use 'myHexjs' as 'hexjs'
 var myHexjs = hexjs.noConflict();
-myHexjs.define( 'module-name', function(){ ... } );
-myHexjs.register('module-name');
+myHexjs.define( id?, dependencies?, factory );
+myHexjs.register( id );
             </pre>
             <h2>hexjs.noConflict(false)</h2>
             <pre class="sh_js">
 // you can use 'define' as 'hexjs.define' and use 'register' as 'hexjs.register'
 hexjs.noConflict(false);
-define( 'module-name', function(){ ... } );
-register('module-name');
+define( id?, dependencies?, factory );
+register( id );
             </pre>
             <h2>hexjs.noConflict(true)</h2>
             <pre class="sh_js">

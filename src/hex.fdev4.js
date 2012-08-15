@@ -1,8 +1,8 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.6
- * @build   120724
+ * @version v0.7
+ * @build   120815
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * 
@@ -297,7 +297,24 @@
         
         if ( isArray( deps ) ){
             each( deps, function( i, id ){
-                list.push( __require.call( null, id ) );
+                var mid;
+                
+                switch ( id ){
+                    case 'require':
+                        mid = Require();
+                        break;
+                    case 'exports':
+                        mid = module.exports;
+                        break;
+                    case 'module':
+                        mid = module;
+                        break;
+                    default:
+                        mid = __require.call( null, id );
+                        break;
+                }
+                
+                list.push( mid );
             } );
         }
         
@@ -352,10 +369,10 @@
             //logLevel = ['debug','log'].indexOf(logLevel) > -1 ? logLevel : 'none';
             switch( logLevel ){
                 case 'debug':
-                    log = createLog();
                     isDebug = true;
-                    hexjs._modules = modules;
-                    hexjs._anonymous = anonymousModules;
+                    log = createLog();
+                    //hexjs._modules = modules;
+                    //hexjs._anonymous = anonymousModules;
                     break;
                 case 'log':
                     isDebug = false;
@@ -394,7 +411,12 @@
     hexjs.register = register;
     hexjs.config = config;
     hexjs.noConflict = noConflict;
-    hexjs.version = '0.6';
+    hexjs.version = '0.7';
+    
+    hexjs.sdk = {
+        modules: modules,
+        _anonymous: anonymousModules
+    };
     
     global.hexjs = hexjs;
     

@@ -116,6 +116,7 @@
                 return require('ut');
             } );
 
+
             /**
              * @module require-refresh
              * */
@@ -130,12 +131,14 @@
                 exports.variable = require('require-refresh-pre').plus();
             } );
             
+            
             /**
              * @module require-readonly
              * */
             hexjs.define( 'require-readonly', function( require ){
                 require.variable = 'require-readonly';
             } );
+            
             
             /**
              * @module require-value-readonly
@@ -152,6 +155,14 @@
              * @module exports
              * */
             hexjs.define( 'exports', function( require, exports ){
+                exports.variable = 'exports';
+            } );
+            
+            
+            /**
+             * @module exports-module
+             * */
+            hexjs.define( 'exports-module', ['exports'], function( exports ){
                 exports.variable = 'exports';
             } );
             
@@ -211,6 +222,14 @@
                 return {
                     variable: 'exports-return-cover'
                 }
+            } );
+
+
+            /**
+             * @module module-module
+             * */
+            hexjs.define( 'module-module', ['module','exports'], function( module, exports ){
+                module.exports = 'module-module';
             } );
 
 
@@ -368,6 +387,11 @@
                 require('ut').print( require.variable !== 'require-readonly', 'the "require" keyword readonly', 'require-readonly' );
             }).register();
             
+            hexjs.define( ['require','module'], function( require, module, req ){
+                module.id = 'register require-module';
+                require('ut').print( require !== req && require.constructor === req.constructor, 'the "require" keyword load by module', 'require-module' );
+            }).register();
+            
             //hexjs.define(function(require){
             //    require('ut').print( require('require-value-readonly-pre').variable === require('require-value-readonly').variable, 'require-value-readonly' );
             //}).register();
@@ -375,6 +399,11 @@
             hexjs.define(function( require, exports, module ){
                 module.id = 'register exports';
                 require('ut').print( require('exports').variable === 'exports', 'exports API', 'exports' );
+            } ).register();
+            
+            hexjs.define( ['require','module'], function( require, module ){
+                module.id = 'register exports-module';
+                require('ut').print( require('exports-module').variable === 'exports', 'the "exports" keyword load by module', 'exports-module' );
             } ).register();
             
             hexjs.define(function( require, exports, module ){
@@ -405,6 +434,11 @@
             hexjs.define(function( require, exports, module ){
                 module.id = 'register exports-return-cover';
                 require('ut').print( require('exports-return-cover').variable === 'exports-return-cover' && require('exports-return-cover').value !== 'value', 'exports API, "return" result will cover "exports"', 'exports-return-cover' );
+            } ).register();
+            
+            hexjs.define( ['require','module'], function( require, module ){
+                module.id = 'register module-module';
+                require('ut').print( require('module-module') === 'module-module', 'the "module" keyword load by module', 'module-module' );
             } ).register();
             
             hexjs.define(function( require, exports, module ){
@@ -476,16 +510,19 @@
             <li id="require"></li>
             <li id="require-refresh"></li>
             <li id="require-readonly"></li>
+            <li id="require-module"></li>
             <!--
             <li id="require-value-readonly"></li>
             -->
             <li id="exports"></li>
+            <li id="exports-module"></li>
             <li id="exports-not-cover"></li>
             <li id="exports-return"></li>
             <li id="exports-return-function"></li>
             <li id="exports-return-array"></li>
             <li id="exports-return-simplify"></li>
             <li id="exports-return-cover"></li>
+            <li id="module-module"></li>
             <li id="module-exports"></li>
             <li id="module-id"></li>
             <li id="module-constructor"></li>
