@@ -1,8 +1,8 @@
 /**
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
- * @version v0.7
- * @build   120815
+ * @version v0.8
+ * @build   120907
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * 
@@ -18,7 +18,7 @@
         anonymousModules = [],
         isDebug = false,
         logSource = 'HexJS',
-        //isDebug = global.location.search.indexOf('hexjs.debug=true') > -1,
+        catchError = null,
         
     isFunction = $.isFunction,
     isArray = $.isArray,
@@ -279,6 +279,8 @@
                 message += ' The message: "' + e.message + '".';
                 
                 logWarn( message );
+            } else {
+                catchError && catchError.call( null, e, module );
             }
             
         }
@@ -389,6 +391,10 @@
         if ( o.logSource ){
             logSource = o.logSource;
         }
+        
+        if ( isFunction( o.catchError ) ){
+            catchError = o.catchError;
+        }
     };
     
     
@@ -411,7 +417,7 @@
     hexjs.register = register;
     hexjs.config = config;
     hexjs.noConflict = noConflict;
-    hexjs.version = '0.7';
+    hexjs.version = '0.8';
     
     hexjs.sdk = {
         modules: modules,

@@ -9,6 +9,14 @@
             hexjs.log('pass: hexjs log');
             hexjs.log('pass: hexjs log warn', 'warn');
             
+            hexjs.config({
+                catchError: function( e, module ){
+                    console.info( e.message, 'warn' );
+                    console.info( module.id || 'anonymous_' + module._idx );
+                }
+            });
+            
+            
             /**
              * @module ut
              * */

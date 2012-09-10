@@ -4,7 +4,7 @@
         <meta charset="utf-8"/>
         <title>HexJS使用手册</title>
         <meta name="author" content="Edgar Hoo, edgarhoo.net"/>
-        <meta name="date" content="Apr 1, 2012"/>
+        <meta name="date" content="Sep 10, 2012"/>
         <link rel="stylesheet" href="http://static.edgarhoo.net/sys/highlight/sh.css"/>
         <style>body{margin:0; padding: 0 72px;}</style>
     </head>
@@ -223,7 +223,8 @@ hexjs.log( message, type );
 // HexJS配置
 hexjs.config({
     logSource: 'myHexJS', // 设置日志来源
-    logLevel: 'debug/log' // 'debug': 进入dubug模式; 'log': 只输出用户操作的日志
+    logLevel: 'debug/log', // 'debug': 进入dubug模式; 'log': 只输出用户操作的日志
+    catchError: function( e, module ){} // 当模块注册失败时，非debug状态处理
 });
             </pre>
         </article>

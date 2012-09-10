@@ -223,7 +223,8 @@ hexjs.log( message, type );
 // config HexJS
 hexjs.config({
     logSource: 'myHexJS', // set log source
-    logLevel: 'debug/log' // 'debug': enter debug mode; 'log': output user's log only
+    logLevel: 'debug/log', // 'debug': enter debug mode; 'log': output user's log only
+    catchError: function( e, module ){} // when failed to register a moudle, deal with on non-debug state
 });
             </pre>
         </article>
