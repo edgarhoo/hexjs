@@ -2,7 +2,7 @@
  * HexJS, a page-level module manager
  * @author  Edgar Hoo , edgarhoo@gmail.com
  * @version v0.8
- * @build   120907
+ * @build   120920
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * */
@@ -16,6 +16,7 @@
         anonymousModules = [],
         isDebug = false,
         logSource = 'HexJS',
+        logLevel = 'none',
         catchError = null,
     
     toString = {}.toString,
@@ -473,7 +474,7 @@
             
         } catch(e) {
             
-            if ( isDebug ){
+            if ( logLevel !== 'none' ){
                 message = '' === module.id ?
                     'the module anonymous_' + module._idx + ' failed to register.':
                     'the module "' + module.id + '" failed to ' + ( 'register' === type ? 'register' : 'initialize' ) + '.';
@@ -566,15 +567,14 @@
      * @param {object} config
      * */
     var config = function(o){
-        var logLevel = o.logLevel;
-        if ( logLevel ){
-            //logLevel = ['debug','log'].indexOf(logLevel) > -1 ? logLevel : 'none';
+        
+        if ( o.logLevel ){
+            logLevel = o.logLevel;
+            
             switch( logLevel ){
                 case 'debug':
                     log = createLog();
                     isDebug = true;
-                    //hexjs._modules = modules;
-                    //hexjs._anonymous = anonymousModules;
                     break;
                 case 'log':
                     isDebug = false;
@@ -617,7 +617,7 @@
     hexjs.register = register;
     hexjs.config = config;
     hexjs.noConflict = noConflict;
-    hexjs.version = '0.7';
+    hexjs.version = '0.8';
     
     hexjs.sdk = {
         modules: modules,

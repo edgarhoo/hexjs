@@ -12,7 +12,7 @@ HexJS: a page-level module manager
  * Unit Testing: http://hexjs.edgarhoo.org/test/unit.testing.html?hexjs.debug=true
 
 ## Change Log
- * 09.07.2012 v0.8 增加模块注册失败时非debug状态的回调
+ * 09.20.2012 v0.8 增加模块注册失败时非debug状态的回调
  * 08.15.2012 v0.7 增加sdk输出模块数据，改require、exports、module三者以模块方式入参
  * 07.24.2012 v0.6 增加config，调整log机制
  * 04.01.2012 v0.5 支持define module时声明其依赖并入参
