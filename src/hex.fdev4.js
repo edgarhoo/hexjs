@@ -6,7 +6,7 @@
  * @uri     http://hexjs.edgarhoo.org/
  * @license MIT License
  * 
- * @base    fdev-v4, http://style.china.alibaba.com/fdevlib/js/fdev-v4/core/fdev-min.js
+ * @base    fdev-v4, http://style.c.aliimg.com/fdevlib/js/fdev-v4/core/fdev-min.js
  * */
 
 (function( $, global ){
